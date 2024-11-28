@@ -8,12 +8,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"dm/security"
 	"fmt"
 	"net"
 	"strconv"
 	"time"
 	"unicode/utf8"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/security"
 )
 
 const (

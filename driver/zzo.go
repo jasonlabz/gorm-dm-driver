@@ -5,8 +5,9 @@
 package driver
 
 import (
-	"dm/util"
 	"strconv"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 const (

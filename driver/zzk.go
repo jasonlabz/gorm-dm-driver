@@ -6,10 +6,11 @@ package driver
 
 import (
 	"bytes"
-	"dm/parser"
-	"dm/util"
 	"strconv"
 	"strings"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/parser"
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 func (dc *DmConnection) lex(sql string) ([]*parser.LVal, error) {

@@ -5,7 +5,6 @@
 package driver
 
 import (
-	"dm/util"
 	"fmt"
 	"math"
 	"os"
@@ -15,6 +14,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 type ExecuteTypeEnum int

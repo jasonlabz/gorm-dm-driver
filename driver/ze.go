@@ -8,12 +8,13 @@ package driver
 import (
 	"context"
 	"database/sql/driver"
-	"dm/util"
 	"fmt"
 	"io"
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 type logFilter struct{}

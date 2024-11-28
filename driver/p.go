@@ -8,9 +8,10 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
-	"dm/i18n"
 	"net"
 	"sync"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/i18n"
 )
 
 // 发版标记

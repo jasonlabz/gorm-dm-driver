@@ -6,10 +6,11 @@ package driver
 
 import (
 	"database/sql/driver"
-	"dm/util"
 	"math"
 	"strconv"
 	"strings"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 const (

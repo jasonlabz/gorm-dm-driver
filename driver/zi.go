@@ -6,12 +6,13 @@ package driver
 
 import (
 	"bytes"
-	"dm/util"
 	"io"
 	"math/big"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 var G2DB g2db

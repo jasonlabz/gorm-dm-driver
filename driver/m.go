@@ -9,12 +9,14 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
-	"dm/parser"
-	"dm/util"
 	"fmt"
-	"golang.org/x/text/encoding"
 	"sync"
 	"sync/atomic"
+
+	"golang.org/x/text/encoding"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/parser"
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 type DmConnection struct {

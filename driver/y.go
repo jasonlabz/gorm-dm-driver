@@ -7,10 +7,11 @@ package driver
 
 import (
 	"bytes"
-	"dm/util"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 /**

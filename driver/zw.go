@@ -6,11 +6,12 @@
 package driver
 
 import (
-	"dm/util"
 	"math/rand"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 var rwMap sync.Map

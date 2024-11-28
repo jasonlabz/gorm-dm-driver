@@ -7,9 +7,10 @@ package driver
 
 import (
 	"bytes"
-	"dm/i18n"
 	"fmt"
 	"runtime"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/i18n"
 )
 
 // 驱动级错误

@@ -8,10 +8,11 @@ package driver
 import (
 	"context"
 	"database/sql/driver"
-	"dm/util"
 	"io"
 	"reflect"
 	"time"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 const SQL_GET_DSC_EP_SITE = "SELECT " +

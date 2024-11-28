@@ -5,9 +5,10 @@
 package driver
 
 import (
-	"dm/util"
 	"strconv"
 	"time"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 var DB2G db2g

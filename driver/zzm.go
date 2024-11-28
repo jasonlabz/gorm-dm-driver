@@ -7,13 +7,14 @@ package driver
 
 import (
 	"bufio"
-	"dm/util"
 	"io"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 var LogDirDef, _ = os.Getwd()

@@ -5,12 +5,13 @@
 package driver
 
 import (
-	"dm/util"
 	"fmt"
 	"math"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 const (

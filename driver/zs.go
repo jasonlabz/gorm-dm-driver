@@ -6,7 +6,6 @@
 package driver
 
 import (
-	"dm/util"
 	"fmt"
 	"math"
 	"strconv"
@@ -14,6 +13,8 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/jasonlabz/gorm-dm-driver/driver/util"
 )
 
 type oracleDateFormat struct {
