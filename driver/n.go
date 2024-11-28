@@ -712,7 +712,7 @@ func (c *DmConnector) parseDSN(dsn string) (*Properties, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	if url.Scheme != "driver" {
+	if url.Scheme != "dm" {
 		return nil, "", DSN_INVALID_SCHEMA
 	}
 
@@ -732,7 +732,7 @@ func (c *DmConnector) parseDSN(dsn string) (*Properties, string, error) {
 func (c *DmConnector) BuildDSN() string {
 	var buf bytes.Buffer
 
-	buf.WriteString("driver://")
+	buf.WriteString("dm://")
 
 	if len(c.user) > 0 {
 		buf.WriteString(url.QueryEscape(c.user))

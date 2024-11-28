@@ -22,7 +22,7 @@ var svn = "27963"
 var globalDmDriver = newDmDriver()
 
 func init() {
-	sql.Register("driver", globalDmDriver)
+	sql.Register("dm", globalDmDriver)
 
 	i18n.InitConfig(i18n.Messages_zh_CN)
 	i18n.InitConfig(i18n.Messages_en_US)
