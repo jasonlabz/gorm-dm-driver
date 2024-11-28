@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm/migrator"
 	"gorm.io/gorm/schema"
 
-	_ "github.com/jasonlabz/dameng/driver" // 引入dm数据库驱动包
+	_ "github.com/jasonlabz/gorm-dm-driver/driver" // 引入dm数据库驱动包
 )
 
 type Config struct {
