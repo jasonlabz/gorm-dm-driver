@@ -49,12 +49,12 @@ func New(config Config) gorm.Dialector {
 }
 
 func (d Dialector) Name() string {
-	return "driver"
+	return "dm"
 }
 
 func (d Dialector) Initialize(db *gorm.DB) (err error) {
 	if d.DriverName == "" {
-		d.DriverName = "driver"
+		d.DriverName = "dm"
 	}
 
 	if d.Conn != nil {
