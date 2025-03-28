@@ -25,12 +25,16 @@ func (m Migrator) AutoMigrate(dst ...interface{}) error {
 	return m.Migrator.AutoMigrate(dst...)
 }
 
-func (m Migrator) CurrentDatabase(table string) (db, tableName string) {
+func (m Migrator) CurrentSchema(table string) (string, string) {
 	if tables := strings.Split(table, `.`); len(tables) == 2 {
 		return tables[0], tables[1]
 	}
-	_ = m.DB.Raw("SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA');").Row().Scan(&db)
-	return db, table
+	return m.CurrentDatabase(), table
+}
+
+func (m Migrator) CurrentDatabase() (name string) {
+	_ = m.DB.Raw("SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA');").Row().Scan(&name)
+	retur 
 }
 
 func (m Migrator) FullDataTypeOf(field *schema.Field) clause.Expr {
@@ -115,7 +119,7 @@ WHERE TABS.SCHID = SCHEMAS.ID AND SF_CHECK_PRIV_OPT(UID(), CURRENT_USERTYPE(), T
 
 	var count int64
 	m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		dbName, table := m.CurrentDatabase(stmt.Table)
+		dbName, table := m.CurrentSchema(stmt.Table)
 		return m.DB.Raw(tableSql, dbName, table).Row().Scan(&count)
 	})
 	return count > 0
@@ -133,7 +137,7 @@ func (m Migrator) GetTables() (tableList []string, err error) {
 AND ((SUBTYPE$ ='UTAB' AND CAST((INFO3 & 0x00FF & 0x003F) AS INT) not in (9, 27, 29, 25, 12, 7, 21, 23, 18, 5))
 OR SUBTYPE$ in ('STAB', 'VIEW', 'SYNOM'))) TABS
 WHERE TABS.SCHID = SCHEMAS.ID AND SF_CHECK_PRIV_OPT(UID(), CURRENT_USERTYPE(), TABS.ID, SCHEMAS.PID, -1, TABS.ID) = 1;`
-	dbName, _ := m.CurrentDatabase("")
+	dbName, _ := m.CurrentSchema("")
 	err = m.DB.Raw(tableSql, dbName).Scan(&tableList).Error
 	return
 }
@@ -327,7 +331,7 @@ WHERE TABS.ID = COLS.ID AND SCHS.ID = TABS.SCHID;`
 
 	var count int64
 	m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		dbName, tableName := m.CurrentDatabase(stmt.Table)
+		dbName, tableName := m.CurrentSchema(stmt.Table)
 		return m.DB.Raw(columnSql, dbName, tableName, field).Row().Scan(&count)
 	})
 	return count > 0
@@ -342,7 +346,7 @@ func (m Migrator) ColumnTypes(dst interface{}) ([]gorm.ColumnType, error) {
 	columnTypes := make([]gorm.ColumnType, 0)
 	execErr := m.RunWithValue(dst, func(stmt *gorm.Statement) error {
 		var (
-			currentDatabase, table = m.CurrentDatabase(stmt.Table)
+			currentDatabase, table = m.CurrentSchema(stmt.Table)
 			columnTypeSQL          = `SELECT /*+ MAX_OPT_N_TABLES(5) */ COLS.NAME, COLS.DEFVAL FROM
 (SELECT ID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCH' AND NAME = ?) SCHS,
 (SELECT ID, SCHID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCHOBJ' AND SUBTYPE$ IN ('UTAB', 'STAB', 'VIEW') AND NAME = ?) TABS,
@@ -482,7 +486,7 @@ where CON_OBJ.ID=CONS.ID and TAB_OBJ.ID=CONS.TABLEID and TAB_OBJ.SCHID=SCH_OBJ.I
 		} else if chk != nil {
 			name = chk.Name
 		}
-		currentDatabase, _ := m.CurrentDatabase(stmt.Table)
+		currentDatabase, _ := m.CurrentSchema(stmt.Table)
 		return m.DB.Raw(conSql, currentDatabase, name).Row().Scan(&count)
 	})
 	return count > 0
@@ -519,7 +523,7 @@ WHERE TAB.ID = COLS.ID AND TAB.ID = OBJ_INDS.TABLEID AND COLS.COLID = OBJ_INDS.C
 		if idx := stmt.Schema.LookIndex(name); idx != nil {
 			name = idx.Name
 		}
-		currentDatabase, table := m.CurrentDatabase(stmt.Table)
+		currentDatabase, table := m.CurrentSchema(stmt.Table)
 		return m.DB.Raw(indexSql, currentDatabase, table, name, name).Row().Scan(&count)
 	})
 	return count > 0
@@ -549,7 +553,7 @@ TAB.ID = COLS.ID AND TAB.ID = OBJ_INDS.TABLEID AND COLS.COLID = OBJ_INDS.COLID A
 	indexes := make([]gorm.Index, 0)
 	err := m.RunWithValue(value, func(stmt *gorm.Statement) error {
 		result := make([]*Index, 0)
-		currentDatabase, table := m.CurrentDatabase(stmt.Table)
+		currentDatabase, table := m.CurrentSchema(stmt.Table)
 		if scanErr := m.DB.Raw(indexSql, currentDatabase, table).Scan(&result).Error; scanErr != nil {
 			return scanErr
 		}
