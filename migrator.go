@@ -34,7 +34,7 @@ func (m Migrator) CurrentSchema(table string) (string, string) {
 
 func (m Migrator) CurrentDatabase() (name string) {
 	_ = m.DB.Raw("SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA');").Row().Scan(&name)
-	retur 
+	return
 }
 
 func (m Migrator) FullDataTypeOf(field *schema.Field) clause.Expr {
