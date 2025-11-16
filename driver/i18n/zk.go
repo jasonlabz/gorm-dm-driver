@@ -10,7 +10,11 @@ const Messages_en_US = `{
   "messages": [
     {
       "id": "error.dsn.invalidSchema",
-      "translation": "DSN must start with driver://"
+      "translation": "DSN must start with dm://"
+    },
+	{
+      "id": "error.dsn.invalidFormat",
+      "translation": "DSN is invalid"
     },
     {
       "id": "error.unsupported.scan",

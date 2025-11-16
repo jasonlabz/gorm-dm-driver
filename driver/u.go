@@ -111,7 +111,6 @@ func (key rsPoolKey) equals(destKey rsPoolKey) bool {
 		key.currentSchema == destKey.currentSchema &&
 		key.sql == destKey.sql &&
 		key.paramCount == destKey.paramCount
-
 }
 
 type rsPoolValue struct {
@@ -131,7 +130,6 @@ func newRsPoolValue(execInfo *execRetInfo) rsPoolValue {
 }
 
 func (rpv rsPoolValue) refreshed(conn *DmConnection) (bool, error) {
-
 	if conn.dmConnector.rsRefreshFreq == 0 {
 		return false, nil
 	}
@@ -140,7 +138,7 @@ func (rpv rsPoolValue) refreshed(conn *DmConnection) (bool, error) {
 		return false, nil
 	}
 
-	tss, err := conn.Access.Dm_build_164(interface{}(rpv.m_TbIds).([]uint32))
+	tss, err := conn.Access.Dm_build_1507(any(rpv.m_TbIds).([]uint32))
 	if err != nil {
 		return false, err
 	}
@@ -159,7 +157,6 @@ func (rpv rsPoolValue) refreshed(conn *DmConnection) (bool, error) {
 		if rpv.m_TbTss[i] != tss[i] {
 			return true, nil
 		}
-
 	}
 	return false, nil
 }
@@ -173,7 +170,7 @@ func (rpv rsPoolValue) getResultSet(stmt *DmStatement) *innerRows {
 
 	if stmt.maxRows > 0 && stmt.maxRows < int64(totalRows) {
 		destDatas = make([][][]byte, stmt.maxRows)
-		copy(destDatas[:len(destDatas)], rpv.execInfo.rsDatas[:len(destDatas)])
+		copy(destDatas[:], rpv.execInfo.rsDatas[:len(destDatas)])
 	}
 
 	rs := newLocalInnerRows(stmt, stmt.columns, destDatas)
@@ -256,9 +253,8 @@ func (rp *rsPool) get(stmt *DmStatement, sql string) (*rsPoolValue, error) {
 		rp.removeInList(key)
 		rp.rsList.PushFront(key)
 		return &v, nil
-	} else {
-		return nil, nil
 	}
+	return nil, nil
 }
 
 func (s *DmStatement) Close() error {
@@ -337,7 +333,7 @@ func (st *DmStatement) prepare() error {
 		}
 	}
 
-	st.execInfo, err = st.dmConn.Access.Dm_build_81(st, Dm_build_376)
+	st.execInfo, err = st.dmConn.Access.Dm_build_1424(st, Dm_build_95)
 	if err != nil {
 		return err
 	}
@@ -376,7 +372,6 @@ func (stmt *DmStatement) close() error {
 	stmt.inUse = true
 
 	return stmt.free()
-
 }
 
 func (stmt *DmStatement) numInput() int {
@@ -404,12 +399,12 @@ func (stmt *DmStatement) exec(args []driver.Value) (*DmResult, error) {
 				break
 			}
 		}
-		for _, row := range arg.([][]interface{}) {
+		for _, row := range arg.([][]any) {
 			tmpArg = append(tmpArg, row)
 		}
 		err = stmt.executeBatch(tmpArg)
 	} else {
-		err = stmt.executeInner(args, Dm_build_376)
+		err = stmt.executeInner(args, Dm_build_95)
 	}
 	if err != nil {
 		return nil, err
@@ -435,16 +430,15 @@ func (stmt *DmStatement) execContext(ctx context.Context, args []driver.NamedVal
 func (stmt *DmStatement) query(args []driver.Value) (*DmRows, error) {
 	var err error
 	stmt.inUse = true
-	err = stmt.executeInner(args, Dm_build_377)
+	err = stmt.executeInner(args, Dm_build_96)
 	if err != nil {
 		return nil, err
 	}
 
 	if stmt.execInfo.hasResultSet {
 		return newDmRows(newInnerRows(0, stmt, stmt.execInfo)), nil
-	} else {
-		return newDmRows(newLocalInnerRows(stmt, nil, nil)), nil
 	}
+	return newDmRows(newLocalInnerRows(stmt, nil, nil)), nil
 }
 
 func (stmt *DmStatement) queryContext(ctx context.Context, args []driver.NamedValue) (*DmRows, error) {
@@ -483,7 +477,7 @@ func NewDmStmt(conn *DmConnection, sql string) (*DmStatement, error) {
 		s.inUse = true
 		s.isBatch = conn.isBatch
 
-		err := conn.Access.Dm_build_63(s)
+		err := conn.Access.Dm_build_1406(s)
 		if err != nil {
 			return nil, err
 		}
@@ -492,7 +486,6 @@ func NewDmStmt(conn *DmConnection, sql string) (*DmStatement, error) {
 	}
 
 	return s, nil
-
 }
 
 func (stmt *DmStatement) checkClosed() error {
@@ -511,7 +504,7 @@ func (stmt *DmStatement) free() error {
 		rs.Close()
 	}
 
-	err := stmt.dmConn.Access.Dm_build_68(int32(stmt.id))
+	err := stmt.dmConn.Access.Dm_build_1411(int32(stmt.id))
 	if err != nil {
 		return err
 	}
@@ -535,13 +528,11 @@ func bindInParam(stmt *DmStatement, i int, dtype int32, isNil bool, firstRow boo
 		bindParam.typeFlag = serverParam.typeFlag
 
 		if (serverParam.colType != UNKNOWN && (isNil || serverParam.typeFlag == TYPE_FLAG_EXACT)) || serverParam.mask != 0 {
-
 			bindParam.colType = serverParam.colType
 			bindParam.prec = serverParam.prec
 			bindParam.scale = serverParam.scale
 			bindParam.mask = serverParam.mask
 		} else {
-
 			bindParam.resetType(dtype)
 		}
 	}
@@ -553,13 +544,10 @@ func bindInParam(stmt *DmStatement, i int, dtype int32, isNil bool, firstRow boo
 	}
 }
 
-func checkBindParameters(stmt *DmStatement, bytes []interface{}) error {
-
+func checkBindParameters(stmt *DmStatement, bytes []any) error {
 	for i := 0; int32(i) < stmt.paramCount; i++ {
 		if stmt.bindParams[i].ioType == IO_TYPE_UNKNOWN {
-
 			if stmt.serverParams[i].ioType == IO_TYPE_OUT {
-
 				bytes[i] = nil
 			} else {
 				return ECGO_UNBINDED_PARAMETER.throw()
@@ -572,7 +560,6 @@ func checkBindParameters(stmt *DmStatement, bytes []interface{}) error {
 		}
 
 		if stmt.serverParams[i].ioType != stmt.bindParams[i].ioType {
-
 			stmt.bindParams[i].ioType = stmt.serverParams[i].ioType
 		}
 	}
@@ -612,25 +599,20 @@ func bindOutParam(stmt *DmStatement, i int, dtype int32) error {
 	bindParam := &stmt.bindParams[i]
 
 	if bindParam.ioType == IO_TYPE_OUT || bindParam.ioType == IO_TYPE_UNKNOWN {
-
 		if serverParam == nil {
-
 			bindParam.resetType(dtype)
 		} else {
-
 			bindParam.name = serverParam.name
 			bindParam.typeDescriptor = serverParam.typeDescriptor
 			bindParam.mask = serverParam.mask
 			bindParam.typeFlag = serverParam.typeFlag
 
 			if (serverParam.colType != UNKNOWN && serverParam.typeFlag == TYPE_FLAG_EXACT) || serverParam.mask != 0 {
-
 				bindParam.colType = serverParam.colType
 				bindParam.prec = serverParam.prec
 				bindParam.scale = serverParam.scale
 				bindParam.mask = serverParam.mask
 			} else {
-
 				bindParam.resetType(dtype)
 			}
 		}
@@ -640,7 +622,7 @@ func bindOutParam(stmt *DmStatement, i int, dtype int32) error {
 			if bindParam.cursorStmt == nil {
 				bindParam.cursorStmt = &DmStatement{dmConn: stmt.dmConn}
 				bindParam.cursorStmt.resetFilterable(&stmt.dmConn.filterable)
-				err = bindParam.cursorStmt.dmConn.Access.Dm_build_63(bindParam.cursorStmt)
+				err = bindParam.cursorStmt.dmConn.Access.Dm_build_1406(bindParam.cursorStmt)
 			}
 		}
 	}
@@ -654,8 +636,8 @@ func bindOutParam(stmt *DmStatement, i int, dtype int32) error {
 	return err
 }
 
-func encodeArgs(stmt *DmStatement, args []driver.Value, firstRow bool) ([]interface{}, error) {
-	bytes := make([]interface{}, len(args), len(args))
+func encodeArgs(stmt *DmStatement, args []driver.Value, firstRow bool) ([]any, error) {
+	bytes := make([]any, len(args), len(args))
 
 	var err error
 
@@ -666,7 +648,7 @@ func encodeArgs(stmt *DmStatement, args []driver.Value, firstRow bool) ([]interf
 			if stmt.bindParams[i].cursorStmt == nil {
 				stmt.bindParams[i].cursorStmt = &DmStatement{dmConn: stmt.dmConn}
 				stmt.bindParams[i].cursorStmt.resetFilterable(&stmt.dmConn.filterable)
-				err = stmt.bindParams[i].cursorStmt.dmConn.Access.Dm_build_63(stmt.bindParams[i].cursorStmt)
+				err = stmt.bindParams[i].cursorStmt.dmConn.Access.Dm_build_1406(stmt.bindParams[i].cursorStmt)
 			}
 			stmt.bindParams[i].ioType = IO_TYPE_INOUT
 			continue
@@ -717,7 +699,6 @@ func encodeArgs(stmt *DmStatement, args []driver.Value, firstRow bool) ([]interf
 			if v == nil {
 				bindInParam(stmt, i, VARBINARY, true, firstRow)
 				bytes[i] = nil
-
 			} else {
 				dtype := VARBINARY
 				if len(v) >= VARBINARY_PREC {
@@ -845,7 +826,7 @@ func encodeArgs(stmt *DmStatement, args []driver.Value, firstRow bool) ([]interf
 				if stmt.bindParams[i].cursorStmt == nil {
 					stmt.bindParams[i].cursorStmt = &DmStatement{dmConn: stmt.dmConn}
 					stmt.bindParams[i].cursorStmt.resetFilterable(&stmt.dmConn.filterable)
-					err = stmt.bindParams[i].cursorStmt.dmConn.Access.Dm_build_63(stmt.bindParams[i].cursorStmt)
+					err = stmt.bindParams[i].cursorStmt.dmConn.Access.Dm_build_1406(stmt.bindParams[i].cursorStmt)
 				}
 			}
 		case io.Reader:
@@ -861,7 +842,6 @@ func encodeArgs(stmt *DmStatement, args []driver.Value, firstRow bool) ([]interf
 		if err != nil {
 			return nil, err
 		}
-
 	}
 	checkBindParameters(stmt, bytes)
 
@@ -872,11 +852,12 @@ type converter struct {
 	conn    *DmConnection
 	isBatch bool
 }
+
 type decimalDecompose interface {
 	Decompose(buf []byte) (form byte, negative bool, coefficient []byte, exponent int32)
 }
 
-func (c *converter) ConvertValue(v interface{}) (driver.Value, error) {
+func (c *converter) ConvertValue(v any) (driver.Value, error) {
 	if driver.IsValue(v) {
 		return v, nil
 	}
@@ -990,9 +971,8 @@ func callValuerValue(vr driver.Valuer) (v driver.Value, err error) {
 }
 
 func namedValueToValue(stmt *DmStatement, named []driver.NamedValue) ([]driver.Value, error) {
-
 	dargs := make([]driver.Value, stmt.paramCount)
-	for i, _ := range dargs {
+	for i := range dargs {
 		found := false
 		for _, nv := range named {
 			if nv.Name != "" && strings.ToUpper(nv.Name) == strings.ToUpper(stmt.serverParams[i].name) {
@@ -1005,14 +985,12 @@ func namedValueToValue(stmt *DmStatement, named []driver.NamedValue) ([]driver.V
 		if !found && i < len(named) {
 			dargs[i] = named[i].Value
 		}
-
 	}
 	return dargs, nil
 }
 
 func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (err error) {
-
-	var bytes []interface{}
+	var bytes []any
 
 	if stmt.paramCount > 0 {
 		bytes, err = encodeArgs(stmt, args, true)
@@ -1020,7 +998,7 @@ func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (e
 			return err
 		}
 	}
-	stmt.execInfo, err = stmt.dmConn.Access.Dm_build_121(stmt, bytes, false)
+	stmt.execInfo, err = stmt.dmConn.Access.Dm_build_1464(stmt, bytes, false)
 	if err != nil {
 		return err
 	}
@@ -1039,7 +1017,7 @@ func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (e
 			}
 
 			if sc, ok := args[i].(sql.Scanner); ok {
-				var v interface{}
+				var v any
 				if outParamData == nil && stmt.bindParams[i].colType != CURSOR {
 					v = nil
 					if err = sc.Scan(v); err != nil {
@@ -1091,7 +1069,7 @@ func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (e
 					v, err = TypeDataSV.bytesToObj(outParamData, nil, stmt.bindParams[i].typeDescriptor)
 				case CURSOR:
 					var tmpExecInfo *execRetInfo
-					if tmpExecInfo, err = stmt.dmConn.Access.Dm_build_131(stmt.bindParams[i].cursorStmt, 1); err != nil {
+					if tmpExecInfo, err = stmt.dmConn.Access.Dm_build_1474(stmt.bindParams[i].cursorStmt, 1); err != nil {
 						return err
 					}
 					if tmpExecInfo.hasResultSet {
@@ -1179,8 +1157,8 @@ func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (e
 						*v = nil
 					} else {
 						var ret [][]byte
-						var dmobj interface{}
-						var arr interface{}
+						var dmobj any
+						var arr any
 						if dmobj, err = TypeDataSV.bytesToObj(outParamData, nil, stmt.bindParams[i].typeDescriptor); err != nil {
 							return err
 						}
@@ -1190,7 +1168,7 @@ func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (e
 									return err
 								}
 								if arr != nil {
-									var iarr = arr.([]interface{})
+									var iarr = arr.([]any)
 									ret = make([][]byte, len(iarr))
 
 									for i = 0; i < len(iarr); i++ {
@@ -1454,7 +1432,7 @@ func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (e
 				case *driver.Rows:
 					if stmt.bindParams[i].colType == CURSOR {
 						var tmpExecInfo *execRetInfo
-						tmpExecInfo, err = stmt.dmConn.Access.Dm_build_131(stmt.bindParams[i].cursorStmt, 1)
+						tmpExecInfo, err = stmt.dmConn.Access.Dm_build_1474(stmt.bindParams[i].cursorStmt, 1)
 						if err != nil {
 							return err
 						}
@@ -1479,7 +1457,7 @@ func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (e
 					if outParamData == nil {
 						*v = DmStruct{}
 					} else {
-						var tmp interface{}
+						var tmp any
 						if tmp, err = TypeDataSV.bytesToObj(outParamData, nil, stmt.bindParams[i].typeDescriptor); err != nil {
 							return err
 						}
@@ -1495,38 +1473,34 @@ func (stmt *DmStatement) executeInner(args []driver.Value, executeType int16) (e
 				return err
 			}
 		}
-
 	}
 	return err
 }
 
 func (stmt *DmStatement) executeBatch(args []driver.Value) (err error) {
+	var bytes [][]any
 
-	var bytes [][]interface{}
-
-	if stmt.execInfo.retSqlType == Dm_build_391 || stmt.execInfo.retSqlType == Dm_build_396 {
+	if stmt.execInfo.retSqlType == Dm_build_110 || stmt.execInfo.retSqlType == Dm_build_115 {
 		return ECGO_INVALID_SQL_TYPE.throw()
 	}
 
 	if stmt.paramCount > 0 && args != nil && len(args) > 0 {
-
 		if len(args) == 1 || stmt.dmConn.dmConnector.batchType == 2 ||
-			(stmt.dmConn.dmConnector.batchNotOnCall && stmt.execInfo.retSqlType == Dm_build_392) {
+			(stmt.dmConn.dmConnector.batchNotOnCall && stmt.execInfo.retSqlType == Dm_build_111) {
 			return stmt.executeBatchByRow(args)
-		} else {
-			for i, arg := range args {
-				var newArg []driver.Value
-				for _, a := range arg.([]interface{}) {
-					newArg = append(newArg, a)
-				}
-				tmpBytes, err := encodeArgs(stmt, newArg, i == 0)
-				if err != nil {
-					return err
-				}
-				bytes = append(bytes, tmpBytes)
-			}
-			stmt.execInfo, err = stmt.dmConn.Access.Dm_build_102(stmt, bytes, stmt.preExec)
 		}
+		for i, arg := range args {
+			var newArg []driver.Value
+			for _, a := range arg.([]any) {
+				newArg = append(newArg, a)
+			}
+			tmpBytes, err := encodeArgs(stmt, newArg, i == 0)
+			if err != nil {
+				return err
+			}
+			bytes = append(bytes, tmpBytes)
+		}
+		stmt.execInfo, err = stmt.dmConn.Access.Dm_build_1445(stmt, bytes, stmt.preExec)
 	}
 	return err
 }
@@ -1537,7 +1511,7 @@ func (stmt *DmStatement) executeBatchByRow(args []driver.Value) (err error) {
 	stmt.execInfo.updateCounts = make([]int64, count)
 	var sqlErrBuilder strings.Builder
 	for i := 0; i < count; i++ {
-		tmpExecInfo, err := stmt.dmConn.Access.Dm_build_121(stmt, args[i].([]interface{}), stmt.preExec || i != 0)
+		tmpExecInfo, err := stmt.dmConn.Access.Dm_build_1464(stmt, args[i].([]any), stmt.preExec || i != 0)
 		if err == nil {
 			stmt.execInfo.union(tmpExecInfo, i, 1)
 		} else {

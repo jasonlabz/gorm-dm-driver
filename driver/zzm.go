@@ -24,7 +24,7 @@ var StatDirDef, _ = os.Getwd()
 const (
 	DEFAULT_PORT int32 = 5236
 
-	//log level
+	// log level
 	LOG_OFF int = 0
 
 	LOG_ERROR int = 1
@@ -39,7 +39,7 @@ const (
 
 	LOG_ALL int = 9
 
-	//stat
+	// stat
 	STAT_SQL_REMOVE_LATEST int = 0
 
 	STAT_SQL_REMOVE_OLDEST int = 1
@@ -62,7 +62,7 @@ const (
 
 	LogFlushFreqDef = 10 // 日志刷盘时间s (>=0)
 
-	LogFlushQueueSizeDef = 100 //日志队列大小
+	LogFlushQueueSizeDef = 100 // 日志队列大小
 
 	LogBufferSizeDef = 32 * 1024 // 日志缓冲区大小 (>0)
 
@@ -145,7 +145,7 @@ func load(filePath string) {
 
 	// GlobalProperties = NewProperties()
 	var groupProps *Properties
-	var line string //dm_svc.conf读取到的一行
+	var line string // dm_svc.conf读取到的一行
 
 	for line, err = fileReader.ReadString('\n'); line != "" && (err == nil || err == io.EOF); line, err = fileReader.ReadString('\n') {
 		// 去除#标记的注释
@@ -170,7 +170,6 @@ func load(filePath string) {
 				groupProps.SetProperties(GlobalProperties)
 				dbGroup.(*epGroup).props = groupProps
 			}
-
 		} else {
 			cfgInfo := strings.Split(line, "=")
 			if len(cfgInfo) < 2 {
@@ -300,6 +299,8 @@ func SetServerGroupProperties(props *Properties, key string, value string) bool 
 		props.Set(RwStandbyRecoverTimeKey, value)
 	} else if key == "SCHEMA" {
 		props.Set(SchemaKey, value)
+	} else if key == "CATALOG" {
+		props.Set(CatalogKey, value)
 	} else if key == "SESS_ENCODE" {
 		if IsSupportedCharset(value) {
 			props.Set("sessEncode", value)
@@ -354,7 +355,6 @@ func parseServerName(name string, value string) *epGroup {
 	var svrList = make([]*ep, 0, len(values))
 
 	for _, v := range values {
-
 		var tmp *ep
 		// 先查找IPV6,以[]包括
 		begin := strings.IndexByte(v, '[')
@@ -363,11 +363,12 @@ func parseServerName(name string, value string) *epGroup {
 			end = strings.IndexByte(v[begin:], ']')
 		}
 		if end != -1 {
-			tmpName = v[begin+1 : end]
+			// tmpName = v[begin+1 : end]
+			tmpName = v[begin : end+1]
 
 			// port
 			if portIndex := strings.IndexByte(v[end:], ':'); portIndex != -1 {
-				tmpPort, _ = strconv.Atoi(strings.TrimSpace(v[portIndex+1:]))
+				tmpPort, _ = strconv.Atoi(strings.TrimSpace(v[end+portIndex+1:]))
 			} else {
 				tmpPort = int(DEFAULT_PORT)
 			}
@@ -401,21 +402,21 @@ func setDriverAttributes(props *Properties) {
 	parseLanguage(props.GetString(LanguageKey, "cn"))
 	DbAliveCheckFreq = props.GetInt(DbAliveCheckFreqKey, DbAliveCheckFreqDef, 1, int(INT32_MAX))
 
-	//// log
-	//LogLevel = ParseLogLevel(props)
-	//LogDir = util.StringUtil.FormatDir(props.GetTrimString(LogDirKey, LogDirDef))
-	//LogBufferSize = props.GetInt(LogBufferSizeKey, LogBufferSizeDef, 1, int(INT32_MAX))
-	//LogFlushFreq = props.GetInt(LogFlushFreqKey, LogFlushFreqDef, 1, int(INT32_MAX))
-	//LogFlushQueueSize = props.GetInt(LogFlusherQueueSizeKey, LogFlushQueueSizeDef, 1, int(INT32_MAX))
+	// // log
+	// LogLevel = ParseLogLevel(props)
+	// LogDir = util.StringUtil.FormatDir(props.GetTrimString(LogDirKey, LogDirDef))
+	// LogBufferSize = props.GetInt(LogBufferSizeKey, LogBufferSizeDef, 1, int(INT32_MAX))
+	// LogFlushFreq = props.GetInt(LogFlushFreqKey, LogFlushFreqDef, 1, int(INT32_MAX))
+	// LogFlushQueueSize = props.GetInt(LogFlusherQueueSizeKey, LogFlushQueueSizeDef, 1, int(INT32_MAX))
 	//
-	//// stat
-	//StatEnable = props.GetBool(StatEnableKey, StatEnableDef)
-	//StatDir = util.StringUtil.FormatDir(props.GetTrimString(StatDirKey, StatDirDef))
-	//StatFlushFreq = props.GetInt(StatFlushFreqKey, StatFlushFreqDef, 1, int(INT32_MAX))
-	//StatHighFreqSqlCount = props.GetInt(StatHighFreqSqlCountKey, StatHighFreqSqlCountDef, 0, 1000)
-	//StatSlowSqlCount = props.GetInt(StatSlowSqlCountKey, StatSlowSqlCountDef, 0, 1000)
-	//StatSqlMaxCount = props.GetInt(StatSqlMaxCountKey, StatSqlMaxCountDef, 0, 100000)
-	//parseStatSqlRemoveMode(props)
+	// // stat
+	// StatEnable = props.GetBool(StatEnableKey, StatEnableDef)
+	// StatDir = util.StringUtil.FormatDir(props.GetTrimString(StatDirKey, StatDirDef))
+	// StatFlushFreq = props.GetInt(StatFlushFreqKey, StatFlushFreqDef, 1, int(INT32_MAX))
+	// StatHighFreqSqlCount = props.GetInt(StatHighFreqSqlCountKey, StatHighFreqSqlCountDef, 0, 1000)
+	// StatSlowSqlCount = props.GetInt(StatSlowSqlCountKey, StatSlowSqlCountDef, 0, 1000)
+	// StatSqlMaxCount = props.GetInt(StatSqlMaxCountKey, StatSqlMaxCountDef, 0, 100000)
+	// parseStatSqlRemoveMode(props)
 }
 
 func parseLanguage(value string) {

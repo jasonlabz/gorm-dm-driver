@@ -97,8 +97,7 @@ func dmdtDecodeFast(value []byte) []int {
 	}
 
 	if dtype == DATE {
-
-		dt[OFFSET_YEAR] = int(Dm_build_931.Dm_build_1028(value, 0)) & 0x7FFF
+		dt[OFFSET_YEAR] = int(Dm_build_650.Dm_build_747(value, 0)) & 0x7FFF
 		if dt[OFFSET_YEAR] > 9999 {
 			dt[OFFSET_YEAR] = int(int16(dt[OFFSET_YEAR] | 0x8000))
 		}
@@ -118,10 +117,9 @@ func dmdtDecodeFast(value []byte) []int {
 		dt[OFFSET_SECOND] = ((int(value[1]) >> 3) & 0x1f) + ((int(value[2]) & 0x01) << 5)
 		dt[OFFSET_NANOSECOND] = ((int(value[2]) >> 1) & 0x7f) + ((int(value[3]) & 0x00ff) << 7) + ((int(value[4]) & 0x1F) << 15)
 		dt[OFFSET_NANOSECOND] *= 1000
-		dt[OFFSET_TIMEZONE] = int(Dm_build_931.Dm_build_1028(value, 5))
+		dt[OFFSET_TIMEZONE] = int(Dm_build_650.Dm_build_747(value, 5))
 	} else if dtype == DATETIME {
-
-		dt[OFFSET_YEAR] = int(Dm_build_931.Dm_build_1028(value, 0)) & 0x7FFF
+		dt[OFFSET_YEAR] = int(Dm_build_650.Dm_build_747(value, 0)) & 0x7FFF
 		if dt[OFFSET_YEAR] > 9999 {
 			dt[OFFSET_YEAR] = int(int16(dt[OFFSET_YEAR] | 0x8000))
 		}
@@ -139,8 +137,7 @@ func dmdtDecodeFast(value []byte) []int {
 		dt[OFFSET_NANOSECOND] = ((int(value[5]) >> 1) & 0x7f) + ((int(value[6]) & 0x00ff) << 7) + ((int(value[7]) & 0x1F) << 15)
 		dt[OFFSET_NANOSECOND] *= 1000
 	} else if dtype == DATETIME_TZ {
-
-		dt[OFFSET_YEAR] = int(Dm_build_931.Dm_build_1028(value, 0)) & 0x7FFF
+		dt[OFFSET_YEAR] = int(Dm_build_650.Dm_build_747(value, 0)) & 0x7FFF
 		if dt[OFFSET_YEAR] > 9999 {
 			dt[OFFSET_YEAR] = int(int16(dt[OFFSET_YEAR] | 0x8000))
 		}
@@ -158,10 +155,9 @@ func dmdtDecodeFast(value []byte) []int {
 		dt[OFFSET_NANOSECOND] = ((int(value[5]) >> 1) & 0x7f) + ((int(value[6]) & 0x00ff) << 7) + ((int(value[7]) & 0x1F) << 15)
 		dt[OFFSET_NANOSECOND] *= 1000
 
-		dt[OFFSET_TIMEZONE] = int(Dm_build_931.Dm_build_1028(value, len(value)-2))
+		dt[OFFSET_TIMEZONE] = int(Dm_build_650.Dm_build_747(value, len(value)-2))
 	} else if dtype == DATETIME2 {
-
-		dt[OFFSET_YEAR] = int(Dm_build_931.Dm_build_1028(value, 0)) & 0x7FFF
+		dt[OFFSET_YEAR] = int(Dm_build_650.Dm_build_747(value, 0)) & 0x7FFF
 		if dt[OFFSET_YEAR] > 9999 {
 			dt[OFFSET_YEAR] = int(int16(dt[OFFSET_YEAR] | 0x8000))
 		}
@@ -178,8 +174,7 @@ func dmdtDecodeFast(value []byte) []int {
 
 		dt[OFFSET_NANOSECOND] = ((int(value[5]) >> 1) & 0x7f) + ((int(value[6]) & 0x00ff) << 7) + ((int(value[7]) & 0x00ff) << 15) + ((int(value[8]) & 0x7F) << 23)
 	} else if dtype == DATETIME2_TZ {
-
-		dt[OFFSET_YEAR] = int(Dm_build_931.Dm_build_1028(value, 0)) & 0x7FFF
+		dt[OFFSET_YEAR] = int(Dm_build_650.Dm_build_747(value, 0)) & 0x7FFF
 		if dt[OFFSET_YEAR] > 9999 {
 			dt[OFFSET_YEAR] = int(int16(dt[OFFSET_YEAR] | 0x8000))
 		}
@@ -196,24 +191,23 @@ func dmdtDecodeFast(value []byte) []int {
 
 		dt[OFFSET_NANOSECOND] = ((int(value[5]) >> 1) & 0x7f) + ((int(value[6]) & 0x00ff) << 7) + ((int(value[7]) & 0x00ff) << 15) + ((int(value[8]) & 0x7F) << 23)
 
-		dt[OFFSET_TIMEZONE] = int(Dm_build_931.Dm_build_1028(value, len(value)-2))
+		dt[OFFSET_TIMEZONE] = int(Dm_build_650.Dm_build_747(value, len(value)-2))
 	}
 	return dt
 }
 
 func dmdtDecodeBdta(value []byte) []int {
 	dt := make([]int, DT_LEN)
-	dt[OFFSET_YEAR] = int(Dm_build_931.Dm_build_1028(value, 0))
+	dt[OFFSET_YEAR] = int(Dm_build_650.Dm_build_747(value, 0))
 	dt[OFFSET_MONTH] = int(value[2] & 0xFF)
 	dt[OFFSET_DAY] = int(value[3] & 0xFF)
 	dt[OFFSET_HOUR] = int(value[4] & 0xFF)
 	dt[OFFSET_MINUTE] = int(value[5] & 0xFF)
 	dt[OFFSET_SECOND] = int(value[6] & 0xFF)
 	dt[OFFSET_NANOSECOND] = int((value[7] & 0xFF) + (value[8] << 8) + (value[9] << 16))
-	dt[OFFSET_TIMEZONE] = int(Dm_build_931.Dm_build_1028(value, 10))
+	dt[OFFSET_TIMEZONE] = int(Dm_build_650.Dm_build_747(value, 10))
 
 	if len(value) > 12 {
-
 		dt[OFFSET_NANOSECOND] += int(value[12] << 24)
 	}
 	return dt
@@ -287,9 +281,8 @@ func formatYear(value int) string {
 func format2(value int) string {
 	if value < 10 {
 		return "0" + strconv.FormatInt(int64(value), 10)
-	} else {
-		return strconv.FormatInt(int64(value), 10)
 	}
+	return strconv.FormatInt(int64(value), 10)
 }
 
 func formatMilliSecond(ms int, prec int) string {
@@ -326,9 +319,8 @@ func formatTZ(tz int) string {
 
 	if tz >= 0 {
 		return "+" + format2(tz_hour) + ":" + format2(tz_min)
-	} else {
-		return "-" + format2(tz_hour) + ":" + format2(tz_min)
 	}
+	return "-" + format2(tz_hour) + ":" + format2(tz_min)
 }
 
 func toDTFromTime(x time.Time) []int {
@@ -422,7 +414,6 @@ func toDTFromString(s string, dt []int) (dtype int, err error) {
 	}
 
 	if date_s != "" {
-
 		firstDash = strings.Index(date_s, "-")
 		secondDash = strings.Index(date_s[firstDash+1:], "-")
 
@@ -440,7 +431,6 @@ func toDTFromString(s string, dt []int) (dtype int, err error) {
 		}
 
 		if (firstDash > 0) && (secondDash > 0) && (secondDash < len(date_s)-1) {
-
 			if sign == 1 {
 				i, err := strconv.ParseInt(date_s[:firstDash], 10, 32)
 				if err != nil {
@@ -610,7 +600,6 @@ func transformTZ(dt []int, defaultSrcTz int, destTz int) {
 		dt = addMinute(dt, destTz-srcTz)
 
 		dt[OFFSET_TIMEZONE] = destTz
-
 	}
 }
 
@@ -734,7 +723,7 @@ func encode(dt []int, column column, lTz int, dTz int) ([]byte, error) {
 
 		ret[7] = (byte)((msec >> 15) & 0xFF)
 
-		Dm_build_931.Dm_build_942(ret, 8, int16(tz))
+		Dm_build_650.Dm_build_661(ret, 8, int16(tz))
 	} else if column.colType == DATETIME2_TZ {
 		ret = make([]byte, 11)
 
@@ -760,7 +749,7 @@ func encode(dt []int, column column, lTz int, dTz int) ([]byte, error) {
 
 		ret[8] = (byte)((msec >> 23) & 0xFF)
 
-		Dm_build_931.Dm_build_942(ret, 8, int16(tz))
+		Dm_build_650.Dm_build_661(ret, 8, int16(tz))
 	} else if column.colType == TIME {
 		msec /= 1000
 		ret = make([]byte, 5)
@@ -788,7 +777,7 @@ func encode(dt []int, column column, lTz int, dTz int) ([]byte, error) {
 
 		ret[4] = (byte)((msec >> 15) & 0xFF)
 
-		Dm_build_931.Dm_build_942(ret, 5, int16(tz))
+		Dm_build_650.Dm_build_661(ret, 5, int16(tz))
 	}
 
 	return ret, nil

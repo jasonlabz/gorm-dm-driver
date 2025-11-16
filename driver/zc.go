@@ -105,7 +105,7 @@ func runLog() {
 			flushFreq:  LogFlushFreq,
 			filePath:   LogDir,
 			filePrefix: "dm_go",
-			buffer:     Dm_build_1216(),
+			buffer:     Dm_build_935(),
 		}
 		go goMap["log"].doRun()
 	}
@@ -239,7 +239,6 @@ func (rwi *rwInfo) cleanup() {
 
 func (rwi *rwInfo) toPrimary() RWSiteEnum {
 	if rwi.distribute != PRIMARY {
-
 		rwi.rwCounter.countPrimary()
 	}
 	rwi.distribute = PRIMARY
@@ -247,7 +246,6 @@ func (rwi *rwInfo) toPrimary() RWSiteEnum {
 }
 
 func (rwi *rwInfo) toAny() RWSiteEnum {
-
 	rwi.distribute = rwi.rwCounter.count(ANYSITE, rwi.connStandby)
 	return rwi.distribute
 }
@@ -303,6 +301,7 @@ func newStatInfo() *statInfo {
 	si := new(statInfo)
 	return si
 }
+
 func (si *statInfo) init(conn *DmConnection) {
 	si.connStat = goStat.createConnStat(conn)
 }

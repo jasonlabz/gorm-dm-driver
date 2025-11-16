@@ -168,8 +168,7 @@ func (RWUtil rwUtil) isCreateStandbyStmt(stmt *DmStatement) bool {
 	return stmt != nil && stmt.rwInfo.readOnly && RWUtil.isStandbyAlive(stmt.dmConn)
 }
 
-func (RWUtil rwUtil) executeByConn(conn *DmConnection, query string, execute1 func() (interface{}, error), execute2 func(otherConn *DmConnection) (interface{}, error)) (interface{}, error) {
-
+func (RWUtil rwUtil) executeByConn(conn *DmConnection, query string, execute1 func() (any, error), execute2 func(otherConn *DmConnection) (any, error)) (any, error) {
 	if err := RWUtil.recoverStandby(conn); err != nil {
 		return nil, err
 	}
@@ -180,11 +179,9 @@ func (RWUtil rwUtil) executeByConn(conn *DmConnection, query string, execute1 fu
 	ret, err := execute1()
 	if err != nil {
 		if conn.rwInfo.connCurrent == conn.rwInfo.connStandby {
-
 			RWUtil.afterExceptionOnStandby(conn, err)
 			turnToPrimary = true
 		} else {
-
 			return nil, err
 		}
 	}
@@ -198,16 +195,14 @@ func (RWUtil rwUtil) executeByConn(conn *DmConnection, query string, execute1 fu
 	}
 
 	switch curConn.lastExecInfo.retSqlType {
-	case Dm_build_382, Dm_build_383, Dm_build_387, Dm_build_394, Dm_build_393, Dm_build_385:
+	case Dm_build_101, Dm_build_102, Dm_build_106, Dm_build_113, Dm_build_112, Dm_build_104:
 		{
-
 			if otherConn != nil {
 				execute2(otherConn)
 			}
 		}
-	case Dm_build_392:
+	case Dm_build_111:
 		{
-
 			sqlhead := regexp.MustCompile("[ (]").Split(strings.TrimSpace(query), 2)[0]
 			if util.StringUtil.EqualsIgnoreCase(sqlhead, "SP_SET_PARA_VALUE") || util.StringUtil.EqualsIgnoreCase(sqlhead, "SP_SET_SESSION_READONLY") {
 				if otherConn != nil {
@@ -215,9 +210,8 @@ func (RWUtil rwUtil) executeByConn(conn *DmConnection, query string, execute1 fu
 				}
 			}
 		}
-	case Dm_build_391:
+	case Dm_build_110:
 		{
-
 			if conn.dmConnector.rwHA && curConn == conn.rwInfo.connStandby &&
 				(curConn.lastExecInfo.rsDatas == nil || len(curConn.lastExecInfo.rsDatas) == 0) {
 				turnToPrimary = true
@@ -234,7 +228,7 @@ func (RWUtil rwUtil) executeByConn(conn *DmConnection, query string, execute1 fu
 	return ret, nil
 }
 
-func (RWUtil rwUtil) executeByStmt(stmt *DmStatement, execute1 func() (interface{}, error), execute2 func(otherStmt *DmStatement) (interface{}, error)) (interface{}, error) {
+func (RWUtil rwUtil) executeByStmt(stmt *DmStatement, execute1 func() (any, error), execute2 func(otherStmt *DmStatement) (any, error)) (any, error) {
 	orgStmt := stmt.rwInfo.stmtCurrent
 	query := stmt.nativeSql
 
@@ -251,7 +245,6 @@ func (RWUtil rwUtil) executeByStmt(stmt *DmStatement, execute1 func() (interface
 
 	ret, err := execute1()
 	if err != nil {
-
 		if stmt.rwInfo.stmtCurrent == stmt.rwInfo.stmtStandby {
 			RWUtil.afterExceptionOnStandby(stmt.dmConn, err)
 			turnToPrimary = true
@@ -269,17 +262,15 @@ func (RWUtil rwUtil) executeByStmt(stmt *DmStatement, execute1 func() (interface
 	}
 
 	switch curStmt.execInfo.retSqlType {
-	case Dm_build_382, Dm_build_383, Dm_build_387, Dm_build_394, Dm_build_393, Dm_build_385:
+	case Dm_build_101, Dm_build_102, Dm_build_106, Dm_build_113, Dm_build_112, Dm_build_104:
 		{
-
 			if otherStmt != nil {
 				RWUtil.copyStatement(curStmt, otherStmt)
 				execute2(otherStmt)
 			}
 		}
-	case Dm_build_392:
+	case Dm_build_111:
 		{
-
 			var tmpsql string
 			if query != "" {
 				tmpsql = strings.TrimSpace(query)
@@ -296,9 +287,8 @@ func (RWUtil rwUtil) executeByStmt(stmt *DmStatement, execute1 func() (interface
 				}
 			}
 		}
-	case Dm_build_391:
+	case Dm_build_110:
 		{
-
 			if stmt.dmConn.dmConnector.rwHA && curStmt == stmt.rwInfo.stmtStandby &&
 				(curStmt.execInfo.rsDatas == nil || len(curStmt.execInfo.rsDatas) == 0) {
 				turnToPrimary = true
@@ -345,17 +335,13 @@ func (RWUtil rwUtil) checkReadonlyByStmt(stmt *DmStatement) bool {
 func (RWUtil rwUtil) distributeSqlByConn(conn *DmConnection, query string) RWSiteEnum {
 	var dest RWSiteEnum
 	if !RWUtil.isStandbyAlive(conn) {
-
 		dest = conn.rwInfo.toPrimary()
 	} else if !RWUtil.checkReadonlyByConn(conn, query) {
-
 		dest = conn.rwInfo.toPrimary()
 	} else if (conn.rwInfo.distribute == PRIMARY && !conn.trxFinish) ||
 		(conn.rwInfo.distribute == STANDBY && !conn.rwInfo.connStandby.trxFinish) {
-
 		dest = conn.rwInfo.distribute
 	} else if conn.IsoLevel != int32(sql.LevelSerializable) {
-
 		dest = conn.rwInfo.toAny()
 	} else {
 		dest = conn.rwInfo.toPrimary()
@@ -372,24 +358,19 @@ func (RWUtil rwUtil) distributeSqlByConn(conn *DmConnection, query string) RWSit
 func (RWUtil rwUtil) distributeSqlByStmt(stmt *DmStatement) RWSiteEnum {
 	var dest RWSiteEnum
 	if !RWUtil.isStandbyAlive(stmt.dmConn) {
-
 		dest = stmt.dmConn.rwInfo.toPrimary()
 	} else if !RWUtil.checkReadonlyByStmt(stmt) {
-
 		dest = stmt.dmConn.rwInfo.toPrimary()
 	} else if (stmt.dmConn.rwInfo.distribute == PRIMARY && !stmt.dmConn.trxFinish) ||
 		(stmt.dmConn.rwInfo.distribute == STANDBY && !stmt.dmConn.rwInfo.connStandby.trxFinish) {
-
 		dest = stmt.dmConn.rwInfo.distribute
 	} else if stmt.dmConn.IsoLevel != int32(sql.LevelSerializable) {
-
 		dest = stmt.dmConn.rwInfo.toAny()
 	} else {
 		dest = stmt.dmConn.rwInfo.toPrimary()
 	}
 
 	if dest == STANDBY && !RWUtil.isStandbyStatementValid(stmt) {
-
 		var err error
 		stmt.rwInfo.stmtStandby, err = stmt.dmConn.rwInfo.connStandby.prepare(stmt.nativeSql)
 		if err != nil {

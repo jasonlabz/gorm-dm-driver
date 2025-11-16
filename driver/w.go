@@ -107,7 +107,8 @@ func NewDmTimestampFromTime(time time.Time) *DmTimestamp {
 }
 
 func (dmTimestamp *DmTimestamp) ToTime() time.Time {
-	return toTimeFromDT(dmTimestamp.dt, 0)
+	_, tzs := time.Now().Zone()
+	return toTimeFromDT(dmTimestamp.dt, tzs/60)
 }
 
 // 获取年月日时分秒毫秒时区
@@ -168,9 +169,9 @@ func (dmTimestamp DmTimestamp) Value() (driver.Value, error) {
 	return dmTimestamp, nil
 }
 
-//func (dmTimestamp *DmTimestamp) toBytes() ([]byte, error) {
+// func (dmTimestamp *DmTimestamp) toBytes() ([]byte, error) {
 //	return encode(dmTimestamp.dt, dmTimestamp.dtype, dmTimestamp.scale, dmTimestamp.dt[OFFSET_TIMEZONE])
-//}
+// }
 
 /**
  * 获取当前对象的年月日时分秒，如果原来没有decode会先decode;
@@ -180,7 +181,8 @@ func (dmTimestamp *DmTimestamp) getDt() []int {
 }
 
 func (dmTimestamp *DmTimestamp) getTime() int64 {
-	sec := toTimeFromDT(dmTimestamp.dt, 0).Unix()
+	_, tzs := time.Now().Zone()
+	sec := toTimeFromDT(dmTimestamp.dt, tzs/60).Unix()
 	return sec + int64(dmTimestamp.dt[OFFSET_NANOSECOND])
 }
 

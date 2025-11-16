@@ -13,6 +13,7 @@ import (
 const (
 	YYEOF         = -1    /** This character denotes the end of file */
 	ZZ_BUFFERSIZE = 16384 /** initial size of the lookahead buffer */
+
 	/** lexical states */
 	YYINITIAL = 0
 	xc        = 2
@@ -77,7 +78,7 @@ func zzUnpackActionNoParams() []int {
 func zzUnpackAction(packed []rune, offset int, result []int) int {
 	i := 0           /* index in packed string  */
 	j := offset      /* index in unpacked array */
-	l := len(packed) //130
+	l := len(packed) // 130
 	for i < l {
 		count := packed[i]
 		i++
@@ -124,7 +125,7 @@ func zzUnpackRowMapNoParams() []int {
 func zzUnpackRowMap(packed []rune, offset int, result []int) int {
 	i := 0           /* index in packed string  */
 	j := offset      /* index in unpacked array */
-	l := len(packed) //208
+	l := len(packed) // 208
 	for i < l {
 		high := packed[i] << 16
 		i++
@@ -200,7 +201,7 @@ func zzUnpackTransNoParams() []int {
 func zzUnpackTrans(packed []rune, offset int, result []int) int {
 	i := 0           /* index in packed string  */
 	j := offset      /* index in unpacked array */
-	l := len(packed) //780
+	l := len(packed) // 780
 	for i < l {
 		count := packed[i]
 		i++
@@ -253,7 +254,7 @@ func zzUnpackAttributeNoParams() []int {
 func zzUnpackAttribute(packed []rune, offset int, result []int) int {
 	i := 0           /* index in packed string  */
 	j := offset      /* index in unpacked array */
-	l := len(packed) //78
+	l := len(packed) // 78
 	for i < l {
 		count := packed[i]
 		i++
@@ -286,7 +287,7 @@ type Lexer struct {
 	the source of the yytext() string */
 	zzBuffer []rune
 
-	//zzBytesBuffer []byte
+	// zzBytesBuffer []byte
 
 	/** the textposition at the last accepting state */
 	zzMarkedPos int
@@ -333,7 +334,8 @@ type Lexer struct {
 	zzFinalHighSurrogate int
 
 	/* user code: */
-	ltstr     string
+	ltstr string
+
 	debugFlag bool
 }
 
@@ -366,7 +368,6 @@ func (lexer *Lexer) debug(info string) {
 	if !lexer.debugFlag {
 		return
 	}
-
 }
 
 func (lexer *Lexer) yyerror(msg string) {
@@ -426,7 +427,6 @@ func zzUnpackCMap(packed []rune) []rune {
 * @exception   java.io.IOException  if any I/O-Error occurs
  */
 func (lexer *Lexer) zzRefill() (bool, error) {
-
 	/* first: make room (if you can) */
 	if lexer.zzStartRead > 0 {
 		lexer.zzEndRead += lexer.zzFinalHighSurrogate
@@ -479,7 +479,6 @@ func (lexer *Lexer) zzRefill() (bool, error) {
 	}
 
 	if numRead > 0 {
-
 		lexer.zzEndRead += numRead
 		/* If numRead == requested, we might have requested to few chars to
 		   encode a full Unicode character. We assume that a Reader would
@@ -704,7 +703,6 @@ func (lexer *Lexer) Yylex() (*LVal, error) {
 				} else {
 					zzPeek = zzBufferL[zzMarkedPosL] == '\n'
 				}
-
 			}
 			if zzPeek {
 				lexer.yyline--
@@ -725,10 +723,9 @@ func (lexer *Lexer) Yylex() (*LVal, error) {
 
 		{
 			for true {
-
 				if zzCurrentPosL < zzEndReadL {
 					zzInput = zzBufferL[zzCurrentPosL]
-					zzCurrentPosL += 1 //utf8.RuneLen(zzInput)
+					zzCurrentPosL++ // utf8.RuneLen(zzInput)
 				} else if lexer.zzAtEOF {
 					zzInput = YYEOF
 					goto zzForAction
@@ -750,7 +747,7 @@ func (lexer *Lexer) Yylex() (*LVal, error) {
 						goto zzForAction
 					} else {
 						zzInput = zzBufferL[zzCurrentPosL]
-						zzCurrentPosL += 1 //utf8.RuneLen(zzInput)
+						zzCurrentPosL++ // utf8.RuneLen(zzInput)
 					}
 				}
 
@@ -769,7 +766,6 @@ func (lexer *Lexer) Yylex() (*LVal, error) {
 						goto zzForAction
 					}
 				}
-
 			}
 		}
 

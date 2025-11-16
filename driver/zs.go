@@ -23,7 +23,7 @@ type oracleDateFormat struct {
 	pattern           string
 	language          int
 	scale             int32
-	FormatElementList []interface{}
+	FormatElementList []any
 	YearElement       yearElement
 	MonthElement      monthElement
 	MonElement        monElement
@@ -99,7 +99,6 @@ type monthElement struct {
 var monthNameList = []string{"", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
 
 func (MonthElement monthElement) parse(str string, offset int, dt []int) (int, error) {
-
 	if MonthElement.OracleDateFormat.language == LANGUAGE_CN {
 		index := strings.IndexRune(str[offset:], '月')
 		if index == -1 {
@@ -117,21 +116,20 @@ func (MonthElement monthElement) parse(str string, offset int, dt []int) (int, e
 		}
 		dt[OFFSET_MONTH] = int(mon)
 		return index + utf8.RuneLen('月'), nil
-	} else {
-		str = str[offset:]
-		mon := 0
-		for i := 1; i < len(monthNameList); i++ {
-			if util.StringUtil.StartWithIgnoreCase(str, monthNameList[i]) {
-				mon = i
-				break
-			}
-		}
-		if mon == 0 {
-			return -1, ECGO_INVALID_DATETIME_FORMAT.throw()
-		}
-		dt[OFFSET_MONTH] = mon
-		return offset + len(monthNameList[mon]), nil
 	}
+	str = str[offset:]
+	mon := 0
+	for i := 1; i < len(monthNameList); i++ {
+		if util.StringUtil.StartWithIgnoreCase(str, monthNameList[i]) {
+			mon = i
+			break
+		}
+	}
+	if mon == 0 {
+		return -1, ECGO_INVALID_DATETIME_FORMAT.throw()
+	}
+	dt[OFFSET_MONTH] = mon
+	return offset + len(monthNameList[mon]), nil
 }
 
 func (MonthElement monthElement) format(dt []int) string {
@@ -148,7 +146,6 @@ func (MonthElement monthElement) format(dt []int) string {
 	} else {
 		return monthNameList[value]
 	}
-
 }
 
 type monElement struct {
@@ -160,7 +157,6 @@ type monElement struct {
 var monNameList []string = []string{"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
 func (MonElement monElement) parse(str string, offset int, dt []int) (int, error) {
-
 	if MonElement.OracleDateFormat.language == LANGUAGE_CN {
 		index := strings.IndexRune(str[offset:], '月') + offset
 		if index == -1+offset {
@@ -177,22 +173,20 @@ func (MonElement monElement) parse(str string, offset int, dt []int) (int, error
 		}
 		dt[OFFSET_MONTH] = int(mon)
 		return index + utf8.RuneLen('月'), nil
-	} else {
-		str = str[offset : offset+3]
-		mon := 0
-		for i := 1; i < len(monNameList); i++ {
-			if util.StringUtil.EqualsIgnoreCase(str, monNameList[i]) {
-				mon = i
-				break
-			}
-		}
-		if mon == 0 {
-			return -1, ECGO_INVALID_DATETIME_FORMAT.throw()
-		}
-		dt[OFFSET_MONTH] = mon
-		return offset + 3, nil
 	}
-
+	str = str[offset : offset+3]
+	mon := 0
+	for i := 1; i < len(monNameList); i++ {
+		if util.StringUtil.EqualsIgnoreCase(str, monNameList[i]) {
+			mon = i
+			break
+		}
+	}
+	if mon == 0 {
+		return -1, ECGO_INVALID_DATETIME_FORMAT.throw()
+	}
+	dt[OFFSET_MONTH] = mon
+	return offset + 3, nil
 }
 
 func (MonElement monElement) format(dt []int) string {
@@ -443,9 +437,9 @@ type tzhElement struct {
 
 func (TZHElement tzhElement) parse(str string, offset int, dt []int) (int, error) {
 	if str[offset] == '+' {
-		offset += 1
+		offset++
 	} else if str[offset] == '-' {
-		offset += 1
+		offset++
 		TZHElement.OracleDateFormat.TZNegative = true
 	}
 
@@ -494,9 +488,9 @@ type tzmElement struct {
 
 func (TZMElement tzmElement) parse(str string, offset int, dt []int) (int, error) {
 	if str[offset] == '+' {
-		offset += 1
+		offset++
 	} else if str[offset] == '-' {
-		offset += 1
+		offset++
 		TZMElement.OracleDateFormat.TZNegative = true
 	}
 
@@ -547,11 +541,9 @@ func (AMElement amElement) parse(str string, offset int, dt []int) (int, error) 
 		if util.StringUtil.EqualsIgnoreCase("下午", string(runeStr)) {
 			AMElement.OracleDateFormat.PM = true
 			return offset + utf8.RuneLen('下') + utf8.RuneLen('午'), nil
-		} else {
-			AMElement.OracleDateFormat.PM = false
-			return offset + utf8.RuneLen('上') + utf8.RuneLen('午'), nil
 		}
-
+		AMElement.OracleDateFormat.PM = false
+		return offset + utf8.RuneLen('上') + utf8.RuneLen('午'), nil
 	} else if util.StringUtil.EqualsIgnoreCase("PM", string(runeStr)) {
 		AMElement.OracleDateFormat.PM = true
 	} else {
@@ -567,16 +559,14 @@ func (AMElement amElement) format(dt []int) string {
 	if language == LANGUAGE_CN {
 		if hour > 12 {
 			return "下午"
-		} else {
-			return "上午"
 		}
+		return "上午"
 	}
 
 	if hour > 12 {
 		return "PM"
-	} else {
-		return "AM"
 	}
+	return "AM"
 }
 
 /**
@@ -671,7 +661,7 @@ func (OracleDateFormat *oracleDateFormat) parse(str string) (ret []int, err erro
 		}
 	}
 	if offset < len(str) {
-		//[6103]:文字与格式字符串不匹配.
+		// [6103]:文字与格式字符串不匹配.
 		return nil, ECGO_INVALID_DATETIME_VALUE.throw()
 	}
 
@@ -747,8 +737,7 @@ func (OracleDateFormat *oracleDateFormat) format(dt []int) string {
 /**
  * 解析格式串
  */
-func (OracleDateFormat *oracleDateFormat) analysePattern(pattern string) ([]interface{}, error) {
-
+func (OracleDateFormat *oracleDateFormat) analysePattern(pattern string) ([]any, error) {
 	// 按分隔符split
 	pattern = strings.TrimSpace(pattern)
 	l := len(pattern)
@@ -793,7 +782,7 @@ func (OracleDateFormat *oracleDateFormat) analysePattern(pattern string) ([]inte
 						if i == len(subPattern) {
 							subPattern = ""
 						} else {
-							subPattern = subPattern[i:len(subPattern)]
+							subPattern = subPattern[i:]
 						}
 						break
 					}
@@ -805,7 +794,6 @@ func (OracleDateFormat *oracleDateFormat) analysePattern(pattern string) ([]inte
 					break
 				}
 			}
-
 		} else {
 			OracleDateFormat.FormatElementList = append(OracleDateFormat.FormatElementList, subPattern)
 		}
@@ -860,13 +848,12 @@ func (OracleDateFormat *oracleDateFormat) getFormatElement(word string) (element
 		OracleDateFormat.YearElement.len = len(word)
 		return OracleDateFormat.YearElement, nil
 	} else if strings.Index(word, "F") == 0 || strings.Index(word, "f") == 0 {
-
 		word = strings.ToUpper(word)
 		numIndex := strings.LastIndex(word, "F") + 1
 		var count int64
 		var err error
 		if numIndex < len(word) {
-			count, err = strconv.ParseInt(word[numIndex:len(word)], 10, 32)
+			count, err = strconv.ParseInt(word[numIndex:], 10, 32)
 			if err != nil {
 				return nil, err
 			}

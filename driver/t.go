@@ -304,7 +304,7 @@ func (innerRows *innerRows) HasNextResultSet() bool {
 		return innerRows.nextExecInfo.hasResultSet
 	}
 
-	innerRows.nextExecInfo, err = innerRows.dmStmt.dmConn.Access.Dm_build_131(innerRows.dmStmt, 0)
+	innerRows.nextExecInfo, err = innerRows.dmStmt.dmConn.Access.Dm_build_1474(innerRows.dmStmt, 0)
 	if err != nil {
 		return false
 	}
@@ -463,7 +463,7 @@ func (innerRows *innerRows) checkIndex(index int) *column {
 }
 
 func (innerRows *innerRows) fetchData(startPos int64) bool {
-	execInfo, err := innerRows.dmStmt.dmConn.Access.Dm_build_138(innerRows, startPos)
+	execInfo, err := innerRows.dmStmt.dmConn.Access.Dm_build_1481(innerRows, startPos)
 	if err != nil {
 		return false
 	}
@@ -481,11 +481,10 @@ func (innerRows *innerRows) fetchData(startPos int64) bool {
 
 func (innerRows *innerRows) getRowData(dest []driver.Value) (err error) {
 	for i, column := range innerRows.columns {
-
 		if i <= len(dest)-1 {
 			if column.colType == CURSOR {
 				var tmpExecInfo *execRetInfo
-				tmpExecInfo, err = innerRows.dmStmt.dmConn.Access.Dm_build_131(innerRows.dmStmt, 1)
+				tmpExecInfo, err = innerRows.dmStmt.dmConn.Access.Dm_build_1474(innerRows.dmStmt, 1)
 				if err != nil {
 					return err
 				}

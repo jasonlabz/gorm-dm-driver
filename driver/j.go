@@ -52,7 +52,7 @@ func (da *DmArray) init() *DmArray {
 //
 // 例如，自定义数组类型语句为：create or replace type myArray is array int[];
 //
-// 则绑入绑出的go对象为: val := driver.NewDmArray("myArray", []interface{} {123, 456})
+// 则绑入绑出的go对象为: val := dm.NewDmArray("myArray", []interface{} {123, 456})
 func NewDmArray(typeName string, elements []interface{}) *DmArray {
 	da := new(DmArray)
 	da.typeName = typeName
@@ -70,7 +70,6 @@ func (da *DmArray) create(dc *DmConnection) (*DmArray, error) {
 }
 
 func (da *DmArray) createByArrayDescriptor(arrDesc *ArrayDescriptor, conn *DmConnection) (*DmArray, error) {
-
 	if nil == arrDesc {
 		return nil, ECGO_INVALID_PARAMETER_VALUE.throw()
 	}

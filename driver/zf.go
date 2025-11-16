@@ -33,14 +33,12 @@ type reconnectFilter struct {
 func (rf *reconnectFilter) autoReconnect(connection *DmConnection, err error) error {
 	if dmErr, ok := err.(*DmError); ok {
 		if dmErr.ErrCode == ECGO_COMMUNITION_ERROR.ErrCode || dmErr.ErrCode == ECGO_CONNECTION_CLOSED.ErrCode {
-
 			if connection.dmConnector.driverReconnect {
 				return rf.reconnect(connection, dmErr.getErrText())
-			} else {
-				connection.Access.Close()
-				connection.closed.Set(true)
-				return driver.ErrBadConn
 			}
+			connection.Access.Close()
+			connection.closed.Set(true)
+			return driver.ErrBadConn
 		}
 	}
 	return err
@@ -134,15 +132,14 @@ func (rf *reconnectFilter) checkAndRecover(conn *DmConnection) error {
 
 	if conn.dmConnector.driverReconnect {
 		return conn.reconnect()
-	} else {
-		conn.Access.Close()
-		conn.closed.Set(false)
-		return ECGO_CONNECTION_CLOSED.throw()
 	}
+	conn.Access.Close()
+	conn.closed.Set(false)
+	return ECGO_CONNECTION_CLOSED.throw()
 
-	//return driver.ErrBadConn
+	// return driver.ErrBadConn
 	// do reconnect
-	//return conn.reconnect()
+	// return conn.reconnect()
 }
 
 // DmDriver

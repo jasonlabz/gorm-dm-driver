@@ -29,7 +29,7 @@ type DmStruct struct {
 //
 // 例如，自定义类型语句为：create or replace type myType as object (a1 int, a2 varchar);
 //
-// 则绑入绑出的go对象为: val := driver.NewDmStruct("myType", []interface{} {123, "abc"})
+// 则绑入绑出的go对象为: val := dm.NewDmStruct("myType", []interface{} {123, "abc"})
 func NewDmStruct(typeName string, elements []interface{}) *DmStruct {
 	ds := new(DmStruct)
 	ds.typeName = typeName

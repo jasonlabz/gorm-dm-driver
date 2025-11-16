@@ -79,6 +79,7 @@ func (filterChain *filterChain) DmConnectionBegin(c *DmConnection) (*DmConnectio
 
 	return c.begin()
 }
+
 func (filterChain *filterChain) DmConnectionBeginTx(c *DmConnection, ctx context.Context, opts driver.TxOptions) (*DmConnection, error) {
 	if filterChain.fpos < len(filterChain.filters) {
 		f := filterChain.filters[filterChain.fpos]

@@ -80,9 +80,8 @@ func (g *Properties) GetTrimString(key string, def string) string {
 	value, ok := g.innerProps[strings.ToLower(key)]
 	if !ok || value == "" {
 		return def
-	} else {
-		return strings.TrimSpace(value)
 	}
+	return strings.TrimSpace(value)
 }
 
 func (g *Properties) GetStringArray(key string, def []string) []string {
@@ -96,11 +95,10 @@ func (g *Properties) GetStringArray(key string, def []string) []string {
 	return def
 }
 
-//func (g *Properties) GetBool(key string) bool {
-//	i, _ := strconv.ParseBool(g.innerProps[key])
-//	return i
-//}
-
+//	func (g *Properties) GetBool(key string) bool {
+//		i, _ := strconv.ParseBool(g.innerProps[key])
+//		return i
+//	}
 func (g *Properties) Set(key, value string) {
 	g.innerProps[strings.ToLower(key)] = value
 }

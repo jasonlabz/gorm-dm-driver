@@ -101,8 +101,6 @@ func (SqlName *sqlName) getFulName() (string, error) {
 	// 将有效值返回
 	if len(SqlName.m_fulName) > 0 {
 		return SqlName.m_fulName, nil
-	} else {
-		return SqlName.m_name, nil
 	}
-
+	return SqlName.m_name, nil
 }

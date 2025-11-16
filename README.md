@@ -1,4 +1,4 @@
-﻿# gorm-dm-driver
+﻿# gorm-dm-driver（官方源码：2025/05/13）
 
 ### 达梦数据库 gorm方言包
 

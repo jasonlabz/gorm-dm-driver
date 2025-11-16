@@ -19,9 +19,11 @@ type ThirdPartCipher struct {
 	hashType    int
 	key         []byte
 	cipherCount int // 外部加密算法个数
-	//innerId		int // 外部加密算法内部id
+
+	// innerId		int // 外部加密算法内部id
 	blockSize int // 分组块大小
-	khSize    int // key/hash大小
+
+	khSize int // key/hash大小
 }
 
 func NewThirdPartCipher(encryptType int, key []byte, cipherPath string, hashType int) (ThirdPartCipher, error) {
@@ -52,7 +54,7 @@ func (tpc *ThirdPartCipher) getCount() int {
 
 func (tpc *ThirdPartCipher) getInfo() error {
 	var cipher_id, ty, blk_size, kh_size int
-	//var strptr, _ = syscall.UTF16PtrFromString(tpc.encryptName)
+	// var strptr, _ = syscall.UTF16PtrFromString(tpc.encryptName)
 	var strptr *uint16 = new(uint16)
 	for i := 1; i <= tpc.getCount(); i++ {
 		cipherGetInfo(uintptr(i), uintptr(unsafe.Pointer(&cipher_id)), uintptr(unsafe.Pointer(&strptr)),

@@ -30,10 +30,13 @@ type Dialector struct {
 var (
 	// CreateClauses create clauses
 	CreateClauses = []string{"INSERT", "VALUES", "ON CONFLICT"}
+
 	// QueryClauses query clauses
 	QueryClauses = []string{}
+
 	// UpdateClauses update clauses
 	UpdateClauses = []string{"UPDATE", "SET", "WHERE", "ORDER BY", "LIMIT"}
+
 	// DeleteClauses delete clauses
 	DeleteClauses = []string{"DELETE", "FROM", "WHERE", "ORDER BY", "LIMIT"}
 
@@ -99,7 +102,7 @@ func (d Dialector) Migrator(db *gorm.DB) gorm.Migrator {
 	}
 }
 
-func (d Dialector) BindVarTo(writer clause.Writer, stmt *gorm.Statement, v interface{}) {
+func (d Dialector) BindVarTo(writer clause.Writer, stmt *gorm.Statement, v any) {
 	writer.WriteByte('?')
 }
 
@@ -132,11 +135,11 @@ func (d Dialector) QuoteTo(writer clause.Writer, str string) {
 				writer.WriteByte('"')
 				underQuoted = true
 				if selfQuoted = continuousBacktick > 0; selfQuoted {
-					continuousBacktick -= 1
+					continuousBacktick--
 				}
 			}
 
-			for ; continuousBacktick > 0; continuousBacktick -= 1 {
+			for ; continuousBacktick > 0; continuousBacktick-- {
 				writer.WriteString(`""`)
 			}
 
@@ -151,7 +154,7 @@ func (d Dialector) QuoteTo(writer clause.Writer, str string) {
 	writer.WriteByte('"')
 }
 
-func (d Dialector) Explain(sql string, vars ...interface{}) string {
+func (d Dialector) Explain(sql string, vars ...any) string {
 	return logger.ExplainSQL(sql, nil, `'`, vars...)
 }
 
@@ -172,26 +175,26 @@ func (d Dialector) DataTypeOf(field *schema.Field) string {
 	default:
 		return d.getSchemaCustomType(field)
 		// what oracle do:
-		//notNull, _ := field.TagSettings["NOT NULL"]
-		//unique, _ := field.TagSettings["UNIQUE"]
-		//additionalType := fmt.Sprintf("%s %s", notNull, unique)
-		//if value, ok := field.TagSettings["DEFAULT"]; ok {
+		// notNull, _ := field.TagSettings["NOT NULL"]
+		// unique, _ := field.TagSettings["UNIQUE"]
+		// additionalType := fmt.Sprintf("%s %s", notNull, unique)
+		// if value, ok := field.TagSettings["DEFAULT"]; ok {
 		//	additionalType = fmt.Sprintf("%s %s %s%s", "DEFAULT", value, additionalType, func() string {
 		//		if value, ok := field.TagSettings["COMMENT"]; ok {
 		//			return " COMMENT " + value
 		//		}
 		//		return ""
 		//	}())
-		//}
-		//sqlType = fmt.Sprintf("%v %v", sqlType, additionalType)
+		// }
+		// sqlType = fmt.Sprintf("%v %v", sqlType, additionalType)
 	}
 }
 
 func (d Dialector) getSchemaIntAndUnitType(field *schema.Field) string {
 	constraint := func(sqlType string) string {
-		//if field.NotNull {
+		// if field.NotNull {
 		//	sqlType += " NOT NULL"
-		//}
+		// }
 		if field.AutoIncrement {
 			sqlType += " IDENTITY(1,1)"
 		}
@@ -228,7 +231,7 @@ func (d Dialector) getSchemaStringType(field *schema.Field) string {
 			hasIndex := field.TagSettings["INDEX"] != "" || field.TagSettings["UNIQUE"] != ""
 			// TEXT, GEOMETRY or JSON column can't have a default value
 			if field.PrimaryKey || field.HasDefaultValue || hasIndex {
-				size = 255 // mysql:191, driver not support utf8mb4
+				size = 255 // mysql:191, dm not support utf8mb4
 			}
 		}
 	}
@@ -244,9 +247,9 @@ func (d Dialector) getSchemaStringType(field *schema.Field) string {
 
 func (d Dialector) getSchemaTimeType(field *schema.Field) string {
 	sqlType := "TIMESTAMP WITH TIME ZONE"
-	//if field.NotNull || field.PrimaryKey {
+	// if field.NotNull || field.PrimaryKey {
 	//	sqlType += " NOT NULL"
-	//}
+	// }
 	return sqlType
 }
 

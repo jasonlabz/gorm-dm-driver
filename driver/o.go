@@ -126,7 +126,6 @@ func NewDecimalFromString(s string) (*DmDecimal, error) {
 }
 
 func (d DmDecimal) String() string {
-
 	if d.isZero() {
 		return "0"
 	}
@@ -252,7 +251,7 @@ func newDecimal(dec interface{}, prec int, scale int) (*DmDecimal, error) {
 
 		if isOdd(d.weight) {
 			str += "0"
-			d.weight -= 1
+			d.weight--
 		}
 		if isOdd(len(str)) {
 			str = "0" + str
@@ -275,7 +274,6 @@ func newDecimal(dec interface{}, prec int, scale int) (*DmDecimal, error) {
 
 		if pointIndex != -1 {
 			if str[0] == '0' {
-
 				istart = 2
 				for i = istart; i < length; i++ {
 					if str[i] != '0' {
@@ -302,7 +300,7 @@ func newDecimal(dec interface{}, prec int, scale int) (*DmDecimal, error) {
 
 		if isOdd(d.weight) {
 			str += "0"
-			d.weight -= 1
+			d.weight--
 		}
 		if isOdd(len(str)) {
 			str = "0" + str
@@ -391,7 +389,7 @@ func decodeDecimal(values []byte, prec int, scale int) (*DmDecimal, error) {
 		decimal.sign = -1
 	}
 
-	var flag = int(Dm_build_931.Dm_build_1051(values, 0))
+	var flag = int(Dm_build_650.Dm_build_770(values, 0))
 	var exp int
 	if decimal.sign > 0 {
 		exp = flag - FLAG_POSITIVE

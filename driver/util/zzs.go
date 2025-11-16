@@ -23,7 +23,7 @@ func SliceEquals(src []byte, dest []byte) bool {
 		return false
 	}
 
-	for i, _ := range src {
+	for i := range src {
 		if src[i] != dest[i] {
 			return false
 		}
@@ -42,9 +42,8 @@ func GCD(m int32, n int32) int32 {
 	n = r
 	if r == 0 {
 		return m
-	} else {
-		return GCD(m, n)
 	}
+	return GCD(m, n)
 }
 
 // 返回切片中所有数的累加值

@@ -79,13 +79,12 @@ func getRwCounterInstance(conn *DmConnection, standbyCount int32) *rwCounter {
 		rwc := newRWCounter(conn.dmConnector.rwPercent, standbyCount)
 		rwMap.Store(key, rwc)
 		return rwc
-	} else {
-		rwc := val.(*rwCounter)
-		if rwc.standbyCount != standbyCount {
-			rwc.reset(conn.dmConnector.rwPercent, standbyCount)
-		}
-		return rwc
 	}
+	rwc := val.(*rwCounter)
+	if rwc.standbyCount != standbyCount {
+		rwc.reset(conn.dmConnector.rwPercent, standbyCount)
+	}
+	return rwc
 }
 
 /**
@@ -167,16 +166,15 @@ func (rwc *rwCounter) increasePrimaryNtrx() {
 	rwc.ntrx_total++
 }
 
-//func (rwc *rwCounter) getStandbyNtrx(standby *DmConnection) int64 {
-//	key := standby.dmConnector.host + ":" + strconv.Itoa(int(standby.dmConnector.port))
-//	ret, ok := rwc.standbyNTrxMap[key]
-//	if !ok {
-//		ret = 0
-//	}
+//	func (rwc *rwCounter) getStandbyNtrx(standby *DmConnection) int64 {
+//		key := standby.dmConnector.host + ":" + strconv.Itoa(int(standby.dmConnector.port))
+//		ret, ok := rwc.standbyNTrxMap[key]
+//		if !ok {
+//			ret = 0
+//		}
 //
-//	return ret
-//}
-
+//		return ret
+//	}
 func (rwc *rwCounter) getStandbyId(standby *DmConnection) int32 {
 	key := standby.dmConnector.host + ":" + strconv.Itoa(int(standby.dmConnector.port))
 	rwc.standbyIdMapMu.Lock()
@@ -209,7 +207,7 @@ func (rwc *rwCounter) increaseStandbyNtrx(standby *DmConnection) {
 		defer rwc.standbyNTrxMapMu.Unlock()
 		ret, ok := rwc.standbyNTrxMap[key]
 		if ok {
-			ret += 1
+			ret++
 		} else {
 			ret = 1
 		}
@@ -232,9 +230,8 @@ func (rwc *rwCounter) random(rowCount int32) int32 {
 	rand.Seed(time.Now().UnixNano())
 	if rowCount > rwc.standbyCount {
 		return rand.Int31n(rwc.standbyCount)
-	} else {
-		return rand.Int31n(rowCount)
 	}
+	return rand.Int31n(rowCount)
 }
 
 func (rwc *rwCounter) String() string {

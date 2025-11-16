@@ -10,7 +10,6 @@ type ArrayDescriptor struct {
 }
 
 func newArrayDescriptor(fulName string, conn *DmConnection) (*ArrayDescriptor, error) {
-
 	ad := new(ArrayDescriptor)
 
 	if fulName == "" {

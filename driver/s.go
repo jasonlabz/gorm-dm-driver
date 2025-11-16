@@ -26,9 +26,9 @@ func newDmResult(bs *DmStatement, execInfo *execRetInfo) *DmResult {
  ** PUBLIC METHODS AND FUNCTIONS
  *************************************************************/
 func (r *DmResult) LastInsertId() (int64, error) {
-	//if err := r.dmStmt.checkClosed(); err != nil {
+	// if err := r.dmStmt.checkClosed(); err != nil {
 	//	return -1, err
-	//}
+	// }
 	if len(r.filterChain.filters) == 0 {
 		return r.lastInsertId()
 	}
@@ -36,9 +36,9 @@ func (r *DmResult) LastInsertId() (int64, error) {
 }
 
 func (r *DmResult) RowsAffected() (int64, error) {
-	//if err := r.dmStmt.checkClosed(); err != nil {
+	// if err := r.dmStmt.checkClosed(); err != nil {
 	//	return -1, err
-	//}
+	// }
 	if len(r.filterChain.filters) == 0 {
 		return r.rowsAffected()
 	}

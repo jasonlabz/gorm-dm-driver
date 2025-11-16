@@ -11,12 +11,14 @@ import (
 
 const (
 	DH_KEY_LENGTH int = 64
+
 	/* 低7位用于保存分组加密算法中的工作模式 */
 	WORK_MODE_MASK int = 0x007f
 	ECB_MODE       int = 0x1
 	CBC_MODE       int = 0x2
 	CFB_MODE       int = 0x4
 	OFB_MODE       int = 0x8
+
 	/* 高位保存加密算法 */
 	ALGO_MASK int = 0xff80
 	DES       int = 0x0080
@@ -29,6 +31,7 @@ const (
 
 	// 用户名密码加密算法
 	DES_CFB int = 132
+
 	// 消息加密摘要长度
 	MD5_DIGEST_SIZE int = 16
 

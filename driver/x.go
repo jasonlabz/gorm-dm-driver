@@ -65,9 +65,8 @@ func (ep *ep) getSort(checkTime bool) int32 {
 	if checkTime {
 		if time.Now().UnixNano()-ep.statusRefreshTs < int64(STATUS_VALID_TIME) {
 			return ep.sort
-		} else {
-			return SORT_UNKNOWN
 		}
+		return SORT_UNKNOWN
 	}
 	return ep.sort
 }

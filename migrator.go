@@ -21,19 +21,12 @@ type Migrator struct {
 	Dialector
 }
 
-func (m Migrator) AutoMigrate(dst ...interface{}) error {
+func (m Migrator) AutoMigrate(dst ...any) error {
 	return m.Migrator.AutoMigrate(dst...)
 }
 
-func (m Migrator) CurrentSchema(table string) (string, string) {
-	if tables := strings.Split(table, `.`); len(tables) == 2 {
-		return tables[0], tables[1]
-	}
-	return m.CurrentDatabase(), table
-}
-
 func (m Migrator) CurrentDatabase() (name string) {
-	_ = m.DB.Raw("SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA');").Row().Scan(&name)
+	m.DB.Raw("SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA');").Row().Scan(&name)
 	return
 }
 
@@ -41,13 +34,13 @@ func (m Migrator) FullDataTypeOf(field *schema.Field) clause.Expr {
 	// super
 	return m.Migrator.FullDataTypeOf(field)
 	// bug646499 moved to CreateTable()/AddColumn()/AlterColumn()/MigrateColumn()
-	//expr := m.Migrator.FullDataTypeOf(field)
+	// expr := m.Migrator.FullDataTypeOf(field)
 	//
-	//if value, ok := field.TagSettings["COMMENT"]; ok {
+	// if value, ok := field.TagSettings["COMMENT"]; ok {
 	//	expr.SQL += " COMMENT " + m.Dialector.Explain("?", value)
-	//}
+	// }
 	//
-	//return expr
+	// return expr
 }
 
 func (m Migrator) GetTypeAliases(databaseTypeName string) []string {
@@ -55,7 +48,7 @@ func (m Migrator) GetTypeAliases(databaseTypeName string) []string {
 	return m.Migrator.GetTypeAliases(databaseTypeName)
 }
 
-func (m Migrator) CreateTable(values ...interface{}) error {
+func (m Migrator) CreateTable(values ...any) error {
 	// 将`gorm:"default:true"`转为`gorm:"default:1"`
 	for _, value := range values {
 		if err := m.RunWithValue(value, func(stmt *gorm.Statement) error {
@@ -95,7 +88,7 @@ func (m Migrator) CreateTable(values ...interface{}) error {
 	return nil
 }
 
-func (m Migrator) DropTable(values ...interface{}) error {
+func (m Migrator) DropTable(values ...any) error {
 	values = m.ReorderModels(values, false)
 	for i := len(values) - 1; i >= 0; i-- {
 		tx := m.DB.Session(&gorm.Session{})
@@ -108,7 +101,7 @@ func (m Migrator) DropTable(values ...interface{}) error {
 	return nil
 }
 
-func (m Migrator) HasTable(value interface{}) bool {
+func (m Migrator) HasTable(value any) bool {
 	tableSql := `SELECT /*+ MAX_OPT_N_TABLES(5) */ COUNT(TABS.NAME) FROM
 (SELECT ID, PID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCH' AND NAME = ?) SCHEMAS,
 (SELECT ID, SCHID, NAME FROM SYS.SYSOBJECTS WHERE
@@ -119,13 +112,12 @@ WHERE TABS.SCHID = SCHEMAS.ID AND SF_CHECK_PRIV_OPT(UID(), CURRENT_USERTYPE(), T
 
 	var count int64
 	m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		dbName, table := m.CurrentSchema(stmt.Table)
-		return m.DB.Raw(tableSql, dbName, table).Row().Scan(&count)
+		return m.DB.Raw(tableSql, m.CurrentDatabase(), stmt.Table).Row().Scan(&count)
 	})
 	return count > 0
 }
 
-func (m Migrator) RenameTable(oldName, newName interface{}) error {
+func (m Migrator) RenameTable(oldName, newName any) error {
 	// super
 	return m.Migrator.RenameTable(oldName, newName)
 }
@@ -137,12 +129,12 @@ func (m Migrator) GetTables() (tableList []string, err error) {
 AND ((SUBTYPE$ ='UTAB' AND CAST((INFO3 & 0x00FF & 0x003F) AS INT) not in (9, 27, 29, 25, 12, 7, 21, 23, 18, 5))
 OR SUBTYPE$ in ('STAB', 'VIEW', 'SYNOM'))) TABS
 WHERE TABS.SCHID = SCHEMAS.ID AND SF_CHECK_PRIV_OPT(UID(), CURRENT_USERTYPE(), TABS.ID, SCHEMAS.PID, -1, TABS.ID) = 1;`
-	dbName, _ := m.CurrentSchema("")
-	err = m.DB.Raw(tableSql, dbName).Scan(&tableList).Error
+
+	err = m.DB.Raw(tableSql, m.CurrentDatabase()).Scan(&tableList).Error
 	return
 }
 
-func (m Migrator) AddColumn(dst interface{}, field string) error {
+func (m Migrator) AddColumn(dst any, field string) error {
 	// super
 	if err := m.Migrator.AddColumn(dst, field); err != nil {
 		return err
@@ -159,17 +151,17 @@ func (m Migrator) AddColumn(dst interface{}, field string) error {
 	})
 }
 
-func (m Migrator) DropColumn(dst interface{}, field string) error {
+func (m Migrator) DropColumn(dst any, field string) error {
 	// super
 	return m.Migrator.DropColumn(dst, field)
 }
 
-func (m Migrator) AlterColumn(value interface{}, field string) error {
+func (m Migrator) AlterColumn(value any, field string) error {
 	return m.alterColumn(value, field, false)
 }
 
 // containsUnique: 原本是否就有UNIQUE字段
-func (m Migrator) alterColumn(value interface{}, field string, containsUnique bool) error {
+func (m Migrator) alterColumn(value any, field string, containsUnique bool) error {
 	return m.RunWithValue(value, func(stmt *gorm.Statement) error {
 		if field := stmt.Schema.LookUpField(field); field != nil {
 			typeof := m.FullDataTypeOf(field)
@@ -210,7 +202,7 @@ func (m Migrator) alterColumnComment(stmt *gorm.Statement, field *schema.Field) 
 	return nil
 }
 
-func (m Migrator) MigrateColumn(dst interface{}, field *schema.Field, columnType gorm.ColumnType) error {
+func (m Migrator) MigrateColumn(dst any, field *schema.Field, columnType gorm.ColumnType) error {
 	// super
 	// return m.Migrator.MigrateColumn(dst, field, columnType)
 	// bug629968 不再使用父类默认的MigrateColumn函数，主要修改：
@@ -322,7 +314,7 @@ func (m Migrator) MigrateColumn(dst interface{}, field *schema.Field, columnType
 	return nil
 }
 
-func (m Migrator) HasColumn(value interface{}, field string) bool {
+func (m Migrator) HasColumn(value any, field string) bool {
 	columnSql := `SELECT /*+ MAX_OPT_N_TABLES(5) */ COUNT(DISTINCT COLS.NAME) FROM
 (SELECT ID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCH' AND NAME = ?) SCHS,
 (SELECT ID, SCHID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCHOBJ' AND SUBTYPE$ IN ('UTAB', 'STAB', 'VIEW') AND NAME = ?) TABS,
@@ -331,23 +323,23 @@ WHERE TABS.ID = COLS.ID AND SCHS.ID = TABS.SCHID;`
 
 	var count int64
 	m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		dbName, tableName := m.CurrentSchema(stmt.Table)
-		return m.DB.Raw(columnSql, dbName, tableName, field).Row().Scan(&count)
+		return m.DB.Raw(columnSql, m.CurrentDatabase(), stmt.Table, field).Row().Scan(&count)
 	})
 	return count > 0
 }
 
-func (m Migrator) RenameColumn(value interface{}, oldName, newName string) error {
+func (m Migrator) RenameColumn(value any, oldName, newName string) error {
 	// super
 	return m.Migrator.RenameColumn(value, oldName, newName)
 }
 
-func (m Migrator) ColumnTypes(dst interface{}) ([]gorm.ColumnType, error) {
+func (m Migrator) ColumnTypes(dst any) ([]gorm.ColumnType, error) {
 	columnTypes := make([]gorm.ColumnType, 0)
 	execErr := m.RunWithValue(dst, func(stmt *gorm.Statement) error {
 		var (
-			currentDatabase, table = m.CurrentSchema(stmt.Table)
-			columnTypeSQL          = `SELECT /*+ MAX_OPT_N_TABLES(5) */ COLS.NAME, COLS.DEFVAL FROM
+			currentDatabase = m.CurrentDatabase()
+			table           = stmt.Table
+			columnTypeSQL   = `SELECT /*+ MAX_OPT_N_TABLES(5) */ COLS.NAME, COLS.DEFVAL FROM
 (SELECT ID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCH' AND NAME = ?) SCHS,
 (SELECT ID, SCHID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCHOBJ' AND SUBTYPE$ IN ('UTAB', 'STAB', 'VIEW') AND NAME = ?) TABS,
 SYS.SYSCOLUMNS COLS
@@ -405,7 +397,7 @@ WHERE SCHS.ID=TABS.SCHID AND TABS.ID=COLS.ID AND COLS.ID=CONS.TABLEID and CONS.I
 		for columns.Next() {
 			var (
 				column migrator.ColumnType
-				values = []interface{}{
+				values = []any{
 					&column.NameValue, &column.DefaultValueValue,
 				}
 			)
@@ -460,17 +452,17 @@ func (m Migrator) DropView(name string) error {
 	return m.Migrator.DropView(name)
 }
 
-func (m Migrator) CreateConstraint(dst interface{}, name string) error {
+func (m Migrator) CreateConstraint(dst any, name string) error {
 	// super
 	return m.Migrator.CreateConstraint(dst, name)
 }
 
-func (m Migrator) DropConstraint(value interface{}, name string) error {
+func (m Migrator) DropConstraint(value any, name string) error {
 	// super
 	return m.Migrator.DropConstraint(value, name)
 }
 
-func (m Migrator) HasConstraint(value interface{}, name string) bool {
+func (m Migrator) HasConstraint(value any, name string) bool {
 	conSql := `select count(CON_OBJ.NAME) from
 (select ID from SYSOBJECTS where TYPE$='SCH' and NAME = ?) SCH_OBJ, 
 (select ID, SCHID from SYSOBJECTS where TYPE$='SCHOBJ' and SUBTYPE$ like '_TAB') TAB_OBJ, 
@@ -486,18 +478,17 @@ where CON_OBJ.ID=CONS.ID and TAB_OBJ.ID=CONS.TABLEID and TAB_OBJ.SCHID=SCH_OBJ.I
 		} else if chk != nil {
 			name = chk.Name
 		}
-		currentDatabase, _ := m.CurrentSchema(stmt.Table)
-		return m.DB.Raw(conSql, currentDatabase, name).Row().Scan(&count)
+		return m.DB.Raw(conSql, m.CurrentDatabase(), name).Row().Scan(&count)
 	})
 	return count > 0
 }
 
-func (m Migrator) CreateIndex(dst interface{}, name string) error {
+func (m Migrator) CreateIndex(dst any, name string) error {
 	// super
 	return m.Migrator.CreateIndex(dst, name)
 }
 
-func (m Migrator) DropIndex(value interface{}, name string) error {
+func (m Migrator) DropIndex(value any, name string) error {
 	return m.RunWithValue(value, func(stmt *gorm.Statement) error {
 		if idx := stmt.Schema.LookIndex(name); idx != nil {
 			name = idx.Name
@@ -507,7 +498,7 @@ func (m Migrator) DropIndex(value interface{}, name string) error {
 	})
 }
 
-func (m Migrator) HasIndex(value interface{}, name string) bool {
+func (m Migrator) HasIndex(value any, name string) bool {
 	indexSql := `WITH USERS(ID) AS (SELECT ID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCH' AND NAME = ?),
 TAB(ID,SCHID) AS (SELECT ID, SCHID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCHOBJ' AND SUBTYPE$ = 'UTAB' AND NAME = ?)
 SELECT COUNT(DISTINCT INDEX_NAME) FROM (
@@ -523,13 +514,12 @@ WHERE TAB.ID = COLS.ID AND TAB.ID = OBJ_INDS.TABLEID AND COLS.COLID = OBJ_INDS.C
 		if idx := stmt.Schema.LookIndex(name); idx != nil {
 			name = idx.Name
 		}
-		currentDatabase, table := m.CurrentSchema(stmt.Table)
-		return m.DB.Raw(indexSql, currentDatabase, table, name, name).Row().Scan(&count)
+		return m.DB.Raw(indexSql, m.CurrentDatabase(), stmt.Schema.Table, name, name).Row().Scan(&count)
 	})
 	return count > 0
 }
 
-func (m Migrator) RenameIndex(value interface{}, oldName, newName string) error {
+func (m Migrator) RenameIndex(value any, oldName, newName string) error {
 	return m.RunWithValue(value, func(stmt *gorm.Statement) error {
 		return m.DB.Exec(
 			"ALTER INDEX ? RENAME TO ?",
@@ -538,7 +528,7 @@ func (m Migrator) RenameIndex(value interface{}, oldName, newName string) error 
 	})
 }
 
-func (m Migrator) GetIndexes(value interface{}) ([]gorm.Index, error) {
+func (m Migrator) GetIndexes(value any) ([]gorm.Index, error) {
 	indexSql := `WITH USERS(ID) AS (SELECT ID FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCH' AND NAME = ?),
 TAB(ID,SCHID,NAME) AS (SELECT ID, SCHID, NAME FROM SYS.SYSOBJECTS WHERE TYPE$ = 'SCHOBJ' AND SUBTYPE$ = 'UTAB' AND NAME = ?)
 SELECT /*+ MAX_OPT_N_TABLES(5) */ TAB.NAME AS TABLE_NAME, COLS.NAME AS COLUMN_NAME,
@@ -553,8 +543,7 @@ TAB.ID = COLS.ID AND TAB.ID = OBJ_INDS.TABLEID AND COLS.COLID = OBJ_INDS.COLID A
 	indexes := make([]gorm.Index, 0)
 	err := m.RunWithValue(value, func(stmt *gorm.Statement) error {
 		result := make([]*Index, 0)
-		currentDatabase, table := m.CurrentSchema(stmt.Table)
-		if scanErr := m.DB.Raw(indexSql, currentDatabase, table).Scan(&result).Error; scanErr != nil {
+		if scanErr := m.DB.Raw(indexSql, m.CurrentDatabase(), stmt.Table).Scan(&result).Error; scanErr != nil {
 			return scanErr
 		}
 		indexMap := groupByIndexName(result)

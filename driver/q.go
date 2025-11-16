@@ -86,45 +86,45 @@ func newDmIntervalDTByBytes(bytes []byte) *DmIntervalDT {
 	dt.init()
 
 	dt._type = bytes[21]
-	dt.scaleForSvr = int(Dm_build_931.Dm_build_1033(bytes, 20))
+	dt.scaleForSvr = int(Dm_build_650.Dm_build_752(bytes, 20))
 	dt.leadScale = (dt.scaleForSvr >> 4) & 0x0000000F
 	dt.secScale = dt.scaleForSvr & 0x0000000F
 
 	switch dt._type {
 	case QUA_D:
-		dt.days = int(Dm_build_931.Dm_build_1033(bytes, 0))
+		dt.days = int(Dm_build_650.Dm_build_752(bytes, 0))
 	case QUA_DH:
-		dt.days = int(Dm_build_931.Dm_build_1033(bytes, 0))
-		dt.hours = int(Dm_build_931.Dm_build_1033(bytes, 4))
+		dt.days = int(Dm_build_650.Dm_build_752(bytes, 0))
+		dt.hours = int(Dm_build_650.Dm_build_752(bytes, 4))
 	case QUA_DHM:
-		dt.days = int(Dm_build_931.Dm_build_1033(bytes, 0))
-		dt.hours = int(Dm_build_931.Dm_build_1033(bytes, 4))
-		dt.minutes = int(Dm_build_931.Dm_build_1033(bytes, 8))
+		dt.days = int(Dm_build_650.Dm_build_752(bytes, 0))
+		dt.hours = int(Dm_build_650.Dm_build_752(bytes, 4))
+		dt.minutes = int(Dm_build_650.Dm_build_752(bytes, 8))
 	case QUA_DHMS:
-		dt.days = int(Dm_build_931.Dm_build_1033(bytes, 0))
-		dt.hours = int(Dm_build_931.Dm_build_1033(bytes, 4))
-		dt.minutes = int(Dm_build_931.Dm_build_1033(bytes, 8))
-		dt.seconds = int(Dm_build_931.Dm_build_1033(bytes, 12))
-		dt.fraction = int(Dm_build_931.Dm_build_1033(bytes, 16))
+		dt.days = int(Dm_build_650.Dm_build_752(bytes, 0))
+		dt.hours = int(Dm_build_650.Dm_build_752(bytes, 4))
+		dt.minutes = int(Dm_build_650.Dm_build_752(bytes, 8))
+		dt.seconds = int(Dm_build_650.Dm_build_752(bytes, 12))
+		dt.fraction = int(Dm_build_650.Dm_build_752(bytes, 16))
 	case QUA_H:
-		dt.hours = int(Dm_build_931.Dm_build_1033(bytes, 4))
+		dt.hours = int(Dm_build_650.Dm_build_752(bytes, 4))
 	case QUA_HM:
-		dt.hours = int(Dm_build_931.Dm_build_1033(bytes, 4))
-		dt.minutes = int(Dm_build_931.Dm_build_1033(bytes, 8))
+		dt.hours = int(Dm_build_650.Dm_build_752(bytes, 4))
+		dt.minutes = int(Dm_build_650.Dm_build_752(bytes, 8))
 	case QUA_HMS:
-		dt.hours = int(Dm_build_931.Dm_build_1033(bytes, 4))
-		dt.minutes = int(Dm_build_931.Dm_build_1033(bytes, 8))
-		dt.seconds = int(Dm_build_931.Dm_build_1033(bytes, 12))
-		dt.fraction = int(Dm_build_931.Dm_build_1033(bytes, 16))
+		dt.hours = int(Dm_build_650.Dm_build_752(bytes, 4))
+		dt.minutes = int(Dm_build_650.Dm_build_752(bytes, 8))
+		dt.seconds = int(Dm_build_650.Dm_build_752(bytes, 12))
+		dt.fraction = int(Dm_build_650.Dm_build_752(bytes, 16))
 	case QUA_M:
-		dt.minutes = int(Dm_build_931.Dm_build_1033(bytes, 8))
+		dt.minutes = int(Dm_build_650.Dm_build_752(bytes, 8))
 	case QUA_MS:
-		dt.minutes = int(Dm_build_931.Dm_build_1033(bytes, 8))
-		dt.seconds = int(Dm_build_931.Dm_build_1033(bytes, 12))
-		dt.fraction = int(Dm_build_931.Dm_build_1033(bytes, 16))
+		dt.minutes = int(Dm_build_650.Dm_build_752(bytes, 8))
+		dt.seconds = int(Dm_build_650.Dm_build_752(bytes, 12))
+		dt.fraction = int(Dm_build_650.Dm_build_752(bytes, 16))
 	case QUA_S:
-		dt.seconds = int(Dm_build_931.Dm_build_1033(bytes, 12))
-		dt.fraction = int(Dm_build_931.Dm_build_1033(bytes, 16))
+		dt.seconds = int(Dm_build_650.Dm_build_752(bytes, 12))
+		dt.fraction = int(Dm_build_650.Dm_build_752(bytes, 16))
 	}
 	if dt.days < 0 {
 		dt.days = -dt.days
@@ -175,7 +175,7 @@ func NewDmIntervalDTByString(str string) (dt *DmIntervalDT, err error) {
 	var valueStr string
 
 	if endIndex = strings.Index(leadStr[1:], "'"); leadStr[0] == '\'' && endIndex != -1 {
-		endIndex += 1
+		endIndex++
 		valueStr = strings.TrimSpace(leadStr[1:endIndex])
 		valueStr = dt.checkSign(valueStr)
 		leadStr = strings.TrimSpace(leadStr[endIndex+1:])
@@ -186,7 +186,7 @@ func NewDmIntervalDTByString(str string) (dt *DmIntervalDT, err error) {
 		if endIndex = strings.Index(leadStr[1:], "'"); leadStr[0] != '\'' || endIndex == -1 {
 			return nil, ECGO_INVALID_TIME_INTERVAL.throw()
 		}
-		endIndex += 1
+		endIndex++
 		valueStr = strings.TrimSpace(leadStr[1:endIndex])
 		leadStr = strings.TrimSpace(leadStr[endIndex+1:])
 	}
@@ -210,11 +210,11 @@ func NewDmIntervalDTByString(str string) (dt *DmIntervalDT, err error) {
 			toIndex += leadPrecIndex
 			strLeadPrec = strings.TrimSpace(leadStr[leadPrecIndex:toIndex])
 
-			if strings.Index(leadStr[toIndex:], "HOUR") != -1 {
+			if strings.Contains(leadStr[toIndex:], "HOUR") {
 				if err := dt.setDayToHour(valueStr); err != nil {
 					return nil, ECGO_INVALID_TIME_INTERVAL.throw()
 				}
-			} else if strings.Index(leadStr[toIndex:], "MINUTE") != -1 {
+			} else if strings.Contains(leadStr[toIndex:], "MINUTE") {
 				if err := dt.setDayToMinute(valueStr); err != nil {
 					return nil, ECGO_INVALID_TIME_INTERVAL.throw()
 				}
@@ -247,7 +247,7 @@ func NewDmIntervalDTByString(str string) (dt *DmIntervalDT, err error) {
 		} else {
 			strLeadPrec = leadStr[leadPrecIndex:toIndex]
 
-			if strings.Index(leadStr[toIndex:], "MINUTE") != -1 {
+			if strings.Contains(leadStr[toIndex:], "MINUTE") {
 				if err := dt.setHourToMinute(valueStr); err != nil {
 					return nil, ECGO_INVALID_TIME_INTERVAL.throw()
 				}
@@ -592,13 +592,12 @@ func (dt *DmIntervalDT) String() string {
 		}
 
 		interval += "' SECOND(" + strconv.FormatInt(int64(dt.leadScale), 10) + ", " + strconv.FormatInt(int64(dt.secScale), 10) + ")"
-
 	}
 
 	return interval
 }
 
-func (dest *DmIntervalDT) Scan(src interface{}) error {
+func (dest *DmIntervalDT) Scan(src any) error {
 	if dest == nil {
 		return ECGO_STORE_IN_NIL_POINTER.throw()
 	}
@@ -778,7 +777,6 @@ func (dt *DmIntervalDT) setPrecForSvr(fullStr string, leadScale string, secScale
 }
 
 func (dt *DmIntervalDT) checkSign(str string) string {
-
 	if str[0] == '-' {
 		str = strings.TrimSpace(str[1:])
 		dt.negative = true
@@ -886,7 +884,6 @@ func (dt *DmIntervalDT) setSecond(value string) error {
 		dt.negative = true
 	}
 	return nil
-
 }
 
 func (dt *DmIntervalDT) setHourToSecond(value string) error {
@@ -1211,19 +1208,19 @@ func (dt *DmIntervalDT) encode(scale int) ([]byte, error) {
 
 	bytes := make([]byte, 24)
 	if dt.negative {
-		Dm_build_931.Dm_build_947(bytes, 0, int32(-day))
-		Dm_build_931.Dm_build_947(bytes, 4, int32(-hour))
-		Dm_build_931.Dm_build_947(bytes, 8, int32(-minute))
-		Dm_build_931.Dm_build_947(bytes, 12, int32(-second))
-		Dm_build_931.Dm_build_947(bytes, 16, int32(-f))
-		Dm_build_931.Dm_build_947(bytes, 20, int32(scale))
+		Dm_build_650.Dm_build_666(bytes, 0, int32(-day))
+		Dm_build_650.Dm_build_666(bytes, 4, int32(-hour))
+		Dm_build_650.Dm_build_666(bytes, 8, int32(-minute))
+		Dm_build_650.Dm_build_666(bytes, 12, int32(-second))
+		Dm_build_650.Dm_build_666(bytes, 16, int32(-f))
+		Dm_build_650.Dm_build_666(bytes, 20, int32(scale))
 	} else {
-		Dm_build_931.Dm_build_947(bytes, 0, int32(day))
-		Dm_build_931.Dm_build_947(bytes, 4, int32(hour))
-		Dm_build_931.Dm_build_947(bytes, 8, int32(minute))
-		Dm_build_931.Dm_build_947(bytes, 12, int32(second))
-		Dm_build_931.Dm_build_947(bytes, 16, int32(f))
-		Dm_build_931.Dm_build_947(bytes, 20, int32(scale))
+		Dm_build_650.Dm_build_666(bytes, 0, int32(day))
+		Dm_build_650.Dm_build_666(bytes, 4, int32(hour))
+		Dm_build_650.Dm_build_666(bytes, 8, int32(minute))
+		Dm_build_650.Dm_build_666(bytes, 12, int32(second))
+		Dm_build_650.Dm_build_666(bytes, 16, int32(f))
+		Dm_build_650.Dm_build_666(bytes, 20, int32(scale))
 	}
 	return bytes, nil
 }

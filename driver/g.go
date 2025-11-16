@@ -227,7 +227,6 @@ func (ssv *SqlStatValue) getExecuteMillisTotal() int64 {
 
 func (ssv *SqlStatValue) getHistogramValues() []int64 {
 	return []int64{
-
 		ssv.histogram_0_1,
 		ssv.histogram_1_10,
 		ssv.histogram_10_100,
@@ -241,7 +240,6 @@ func (ssv *SqlStatValue) getHistogramValues() []int64 {
 
 func (ssv *SqlStatValue) getFetchRowCountHistogramValues() []int64 {
 	return []int64{
-
 		ssv.fetchRowCount_0_1,
 		ssv.fetchRowCount_1_10,
 		ssv.fetchRowCount_10_100,
@@ -253,7 +251,6 @@ func (ssv *SqlStatValue) getFetchRowCountHistogramValues() []int64 {
 
 func (ssv *SqlStatValue) getUpdateCountHistogramValues() []int64 {
 	return []int64{
-
 		ssv.updateCount_0_1,
 		ssv.updateCount_1_10,
 		ssv.updateCount_10_100,
@@ -265,7 +262,6 @@ func (ssv *SqlStatValue) getUpdateCountHistogramValues() []int64 {
 
 func (ssv *SqlStatValue) getExecuteAndResultHoldTimeHistogramValues() []int64 {
 	return []int64{
-
 		ssv.executeAndResultHoldTime_0_1,
 		ssv.executeAndResultHoldTime_1_10,
 		ssv.executeAndResultHoldTime_10_100,
@@ -285,8 +281,8 @@ func (ssv *SqlStatValue) getExecuteAndResultSetHoldTimeMilis() int64 {
 	return ssv.executeAndResultSetHoldTime / (1000 * 1000)
 }
 
-func (ssv *SqlStatValue) getData() map[string]interface{} {
-	m := make(map[string]interface{})
+func (ssv *SqlStatValue) getData() map[string]any {
+	m := make(map[string]any)
 
 	m[idConstStr] = ssv.id
 	m[dataSourceConstStr] = ssv.dataSource
@@ -712,7 +708,6 @@ func (s *sqlStat) addFetchRowCount(delta int64) {
 	} else {
 		atomic.AddInt64(&s.FetchRowCount_10000_more, 1)
 	}
-
 }
 
 func (s *sqlStat) addExecuteBatchCount(batchSize int64) {
@@ -816,7 +811,6 @@ func (s *sqlStat) addExecuteTime(nanoSpan int64, parameters string) {
 		current := atomic.LoadInt64(&s.ExecuteSpanNanoMax)
 		if current < nanoSpan {
 			if atomic.CompareAndSwapInt64(&s.ExecuteSpanNanoMax, current, nanoSpan) {
-
 				s.ExecuteNanoSpanMaxOccurTime = time.Now().UnixNano()
 				s.LastSlowParameters = parameters
 
@@ -848,13 +842,12 @@ func (s *sqlStat) getExecuteCount() int64 {
 	return s.ExecuteErrorCount + s.ExecuteSuccessCount
 }
 
-func (s *sqlStat) getData() map[string]interface{} {
+func (s *sqlStat) getData() map[string]any {
 	return s.getValue(false).getData()
 }
 
 func (s *sqlStat) getHistogramValues() []int64 {
 	return []int64{
-
 		s.Histogram_0_1,
 		s.Histogram_1_10,
 		s.Histogram_10_100,
@@ -891,7 +884,6 @@ func (s *sqlStat) getExecuteAndResultSetHoldTimeMilis() int64 {
 
 func (s *sqlStat) getFetchRowCountHistogramValues() []int64 {
 	return []int64{
-
 		s.FetchRowCount_0_1,
 		s.FetchRowCount_1_10,
 		s.FetchRowCount_10_100,
@@ -903,7 +895,6 @@ func (s *sqlStat) getFetchRowCountHistogramValues() []int64 {
 
 func (s *sqlStat) getUpdateCountHistogramValues() []int64 {
 	return []int64{
-
 		s.UpdateCount_0_1,
 		s.UpdateCount_1_10,
 		s.UpdateCount_10_100,
@@ -915,7 +906,6 @@ func (s *sqlStat) getUpdateCountHistogramValues() []int64 {
 
 func (s *sqlStat) getExecuteAndResultHoldTimeHistogramValues() []int64 {
 	return []int64{
-
 		s.ExecuteAndResultHoldTime_0_1,
 		s.ExecuteAndResultHoldTime_1_10,
 		s.ExecuteAndResultHoldTime_10_100,
@@ -984,8 +974,8 @@ func newConnectionStatValue() *connectionStatValue {
 	return csv
 }
 
-func (csv *connectionStatValue) getData() map[string]interface{} {
-	m := make(map[string]interface{})
+func (csv *connectionStatValue) getData() map[string]any {
+	m := make(map[string]any)
 	m[idConstStr] = csv.id
 	m[urlConstStr] = csv.url
 	m[connCountConstStr] = csv.connCount
@@ -1067,13 +1057,11 @@ func (cs *connectionStat) createSqlStat(sql string) *sqlStat {
 		sqlStat.DataSourceId = cs.id
 		if cs.putSqlStat(sqlStat) {
 			return sqlStat
-		} else {
-			return nil
 		}
+		return nil
 	}
 
 	return sqlStat
-
 }
 
 func (cs *connectionStat) putSqlStat(sqlStat *sqlStat) bool {
@@ -1085,16 +1073,14 @@ func (cs *connectionStat) putSqlStat(sqlStat *sqlStat) bool {
 			}
 			cs.sqlStatMap[sqlStat.Sql] = sqlStat
 			return true
-		} else {
-			if sqlStat.RunningCount > 0 || sqlStat.getExecuteCount() > 0 {
-				atomic.AddInt64(&cs.skipSqlCount, 1)
-			}
-			return false
 		}
-	} else {
-		cs.sqlStatMap[sqlStat.Sql] = sqlStat
-		return true
+		if sqlStat.RunningCount > 0 || sqlStat.getExecuteCount() > 0 {
+			atomic.AddInt64(&cs.skipSqlCount, 1)
+		}
+		return false
 	}
+	cs.sqlStatMap[sqlStat.Sql] = sqlStat
+	return true
 }
 
 func (cs *connectionStat) eliminateSqlStat() *sqlStat {
@@ -1127,7 +1113,6 @@ func (cs *connectionStat) getSqlStatMapAndReset() []*SqlStatValue {
 	defer cs.lock.Unlock()
 
 	for s, stat := range cs.sqlStatMap {
-
 		if stat.getExecuteCount() == 0 && stat.RunningCount == 0 {
 			stat.Removed = 1
 			delete(cs.sqlStatMap, s)
@@ -1218,7 +1203,7 @@ func (cs *connectionStat) getValue(reset bool) *connectionStatValue {
 	return val
 }
 
-func (cs *connectionStat) getData() map[string]interface{} {
+func (cs *connectionStat) getData() map[string]any {
 	return cs.getValue(false).getData()
 }
 
@@ -1359,15 +1344,15 @@ const (
 )
 
 type StatReader struct {
-	connStat []map[string]interface{}
+	connStat []map[string]any
 
 	connStatColLens []int
 
-	highFreqSqlStat []map[string]interface{}
+	highFreqSqlStat []map[string]any
 
 	highFreqSqlStatColLens []int
 
-	slowSqlStat []map[string]interface{}
+	slowSqlStat []map[string]any
 
 	slowSqlStatColLens []int
 }
@@ -1387,10 +1372,10 @@ func (sr *StatReader) readConnStat(retList []string, maxCount int) (bool, []stri
 	} else {
 		isAppend = true
 	}
-	var retContent []map[string]interface{}
+	var retContent []map[string]any
 	if maxCount > 0 && len(sr.connStat) > maxCount {
 		retContent = sr.connStat[0:maxCount]
-		sr.connStat = sr.connStat[maxCount:len(sr.connStat)]
+		sr.connStat = sr.connStat[maxCount:]
 	} else {
 		retContent = sr.connStat
 		sr.connStat = nil
@@ -1408,10 +1393,10 @@ func (sr *StatReader) readHighFreqSqlStat(retList []string, maxCount int) (bool,
 	} else {
 		isAppend = true
 	}
-	var retContent []map[string]interface{}
+	var retContent []map[string]any
 	if maxCount > 0 && len(sr.highFreqSqlStat) > maxCount {
 		retContent = sr.highFreqSqlStat[0:maxCount]
-		sr.highFreqSqlStat = sr.highFreqSqlStat[maxCount:len(sr.highFreqSqlStat)]
+		sr.highFreqSqlStat = sr.highFreqSqlStat[maxCount:]
 	} else {
 		retContent = sr.highFreqSqlStat
 		sr.highFreqSqlStat = nil
@@ -1421,8 +1406,8 @@ func (sr *StatReader) readHighFreqSqlStat(retList []string, maxCount int) (bool,
 }
 
 func (sr *StatReader) getHighFreqSqlStat(topCount int, sqlId int,
-	fields []string) []map[string]interface{} {
-	var content []map[string]interface{}
+	fields []string) []map[string]any {
+	var content []map[string]any
 
 	if topCount != 0 {
 		parameters := NewProperties()
@@ -1432,7 +1417,7 @@ func (sr *StatReader) getHighFreqSqlStat(topCount int, sqlId int,
 		parameters.Set(PROP_NAME_PAGE_SIZE, strconv.Itoa(topCount))
 		content = sr.service(URL_SQL, parameters)
 		if sqlId != -1 {
-			matchedContent := make([]map[string]interface{}, 0)
+			matchedContent := make([]map[string]any, 0)
 			for _, sqlStat := range content {
 				idStr := sqlStat["ID"]
 				if idStr == sqlId {
@@ -1445,7 +1430,7 @@ func (sr *StatReader) getHighFreqSqlStat(topCount int, sqlId int,
 	}
 
 	if content == nil {
-		content = make([]map[string]interface{}, 0)
+		content = make([]map[string]any, 0)
 	} else {
 		i := 1
 		for _, m := range content {
@@ -1467,10 +1452,10 @@ func (sr *StatReader) readSlowSqlStat(retList []string, maxCount int) (bool, []s
 	} else {
 		isAppend = true
 	}
-	var retContent []map[string]interface{}
+	var retContent []map[string]any
 	if maxCount > 0 && len(sr.slowSqlStat) > maxCount {
 		retContent = sr.slowSqlStat[0:maxCount]
-		sr.slowSqlStat = sr.slowSqlStat[maxCount:len(sr.slowSqlStat)]
+		sr.slowSqlStat = sr.slowSqlStat[maxCount:]
 	} else {
 		retContent = sr.slowSqlStat
 		sr.slowSqlStat = nil
@@ -1479,8 +1464,8 @@ func (sr *StatReader) readSlowSqlStat(retList []string, maxCount int) (bool, []s
 	return sr.slowSqlStat != nil, retList
 }
 
-func (sr *StatReader) getSlowSqlStat(topCount int, sqlId int, fields []string) []map[string]interface{} {
-	var content []map[string]interface{}
+func (sr *StatReader) getSlowSqlStat(topCount int, sqlId int, fields []string) []map[string]any {
+	var content []map[string]any
 
 	if topCount != 0 {
 		parameters := NewProperties()
@@ -1491,7 +1476,7 @@ func (sr *StatReader) getSlowSqlStat(topCount int, sqlId int, fields []string) [
 
 		content = sr.service(URL_SQL, parameters)
 		if sqlId != -1 {
-			matchedContent := make([]map[string]interface{}, 0)
+			matchedContent := make([]map[string]any, 0)
 			for _, sqlStat := range content {
 				idStr := sqlStat["ID"]
 				if idStr == sqlId {
@@ -1504,7 +1489,7 @@ func (sr *StatReader) getSlowSqlStat(topCount int, sqlId int, fields []string) [
 	}
 
 	if content == nil {
-		content = make([]map[string]interface{}, 0)
+		content = make([]map[string]any, 0)
 	} else {
 		i := 1
 		for _, m := range content {
@@ -1516,10 +1501,10 @@ func (sr *StatReader) getSlowSqlStat(topCount int, sqlId int, fields []string) [
 	return content
 }
 
-func (sr *StatReader) getConnStat(connId string, fields []string) []map[string]interface{} {
+func (sr *StatReader) getConnStat(connId string, fields []string) []map[string]any {
 	content := sr.service(URL_DATASOURCE, nil)
 	if connId != "" {
-		matchedContent := make([]map[string]interface{}, 0)
+		matchedContent := make([]map[string]any, 0)
 		for _, dsStat := range content {
 			idStr := dsStat["Identity"]
 			if connId == idStr {
@@ -1530,7 +1515,7 @@ func (sr *StatReader) getConnStat(connId string, fields []string) []map[string]i
 		content = matchedContent
 	}
 	if content == nil {
-		content = make([]map[string]interface{}, 0)
+		content = make([]map[string]any, 0)
 	} else {
 		i := 1
 		for _, m := range content {
@@ -1542,7 +1527,7 @@ func (sr *StatReader) getConnStat(connId string, fields []string) []map[string]i
 	return content
 }
 
-func (sr *StatReader) getFormattedOutput(content []map[string]interface{}, fields []string, colLens []int,
+func (sr *StatReader) getFormattedOutput(content []map[string]any, fields []string, colLens []int,
 	isAppend bool) string {
 	return toTable(content, fields, colLens, true, isAppend)
 }
@@ -1574,7 +1559,7 @@ func (sr *StatReader) parseUrl(url string) *Properties {
 	return parameters
 }
 
-func (sr *StatReader) service(url string, params *Properties) []map[string]interface{} {
+func (sr *StatReader) service(url string, params *Properties) []map[string]any {
 	if params != nil {
 		params.SetProperties(sr.parseUrl(url))
 	} else {
@@ -1602,8 +1587,8 @@ func (sr *StatReader) service(url string, params *Properties) []map[string]inter
 	}
 }
 
-func (sr *StatReader) getSqlStatList(params *Properties) []map[string]interface{} {
-	array := make([]map[string]interface{}, 0)
+func (sr *StatReader) getSqlStatList(params *Properties) []map[string]any {
+	array := make([]map[string]any, 0)
 	connStatMap := goStat.getConnStatMap()
 	var sqlStatMap map[string]*sqlStat
 	for _, connStat := range connStatMap {
@@ -1623,8 +1608,8 @@ func (sr *StatReader) getSqlStatList(params *Properties) []map[string]interface{
 	return array
 }
 
-func (sr *StatReader) getSqlStatDetailList(params *Properties) []map[string]interface{} {
-	array := make([]map[string]interface{}, 0)
+func (sr *StatReader) getSqlStatDetailList(params *Properties) []map[string]any {
+	array := make([]map[string]any, 0)
 	connStatMap := goStat.getConnStatMap()
 	var data *sqlStat
 	sqlId := ""
@@ -1642,7 +1627,6 @@ func (sr *StatReader) getSqlStatDetailList(params *Properties) []map[string]inte
 			} else {
 				sqlStatMap := connStat.getSqlStatMap()
 				for _, sqlStat := range sqlStatMap {
-
 					if sqlId == sqlStat.Id {
 						data = sqlStat
 						break
@@ -1653,15 +1637,13 @@ func (sr *StatReader) getSqlStatDetailList(params *Properties) []map[string]inte
 		}
 	}
 	if data != nil {
-
 		array = append(array, data.getData())
-
 	}
 	return array
 }
 
-func (sr *StatReader) getConnStatList(params *Properties) []map[string]interface{} {
-	array := make([]map[string]interface{}, 0)
+func (sr *StatReader) getConnStatList(params *Properties) []map[string]any {
+	array := make([]map[string]any, 0)
 	connStatMap := goStat.getConnStatMap()
 	id := ""
 	if v := params.GetString(PROP_NAME_DATASOURCE_ID, ""); v != "" {
@@ -1684,16 +1666,14 @@ func (sr *StatReader) getConnStatList(params *Properties) []map[string]interface
 				continue
 			}
 		} else {
-
 			array = append(array, data)
 		}
-
 	}
 	return array
 }
 
-func (sr *StatReader) getConnStatDetailList(params *Properties) []map[string]interface{} {
-	array := make([]map[string]interface{}, 0)
+func (sr *StatReader) getConnStatDetailList(params *Properties) []map[string]any {
+	array := make([]map[string]any, 0)
 	var data *connectionStat
 	connStatMap := goStat.getConnStatMap()
 	id := ""
@@ -1710,72 +1690,71 @@ func (sr *StatReader) getConnStatDetailList(params *Properties) []map[string]int
 	}
 	if data != nil {
 		dataValue := data.getValue(false)
-		m := make(map[string]interface{}, 2)
+		m := make(map[string]any, 2)
 		m["name"] = "数据源"
 		m["value"] = dataValue.url
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "总会话数"
 		m["value"] = dataValue.connCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "活动会话数"
 		m["value"] = dataValue.activeConnCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "活动会话数峰值"
 		m["value"] = dataValue.maxActiveStmtCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "总句柄数"
 		m["value"] = dataValue.stmtCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "活动句柄数"
 		m["value"] = dataValue.activeStmtCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "活动句柄数峰值"
 		m["value"] = dataValue.maxActiveStmtCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "执行次数"
 		m["value"] = dataValue.executeCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "执行出错次数"
 		m["value"] = dataValue.errorCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "提交次数"
 		m["value"] = dataValue.commitCount
 		array = append(array, m)
 
-		m = make(map[string]interface{}, 2)
+		m = make(map[string]any, 2)
 		m["name"] = "回滚次数"
 		m["value"] = dataValue.rollbackCount
 		array = append(array, m)
-
 	}
 	return array
 }
 
 type mapSlice struct {
-	m          []map[string]interface{}
+	m          []map[string]any
 	isDesc     bool
 	orderByKey string
 }
 
-func newMapSlice(m []map[string]interface{}, isDesc bool, orderByKey string) *mapSlice {
+func newMapSlice(m []map[string]any, isDesc bool, orderByKey string) *mapSlice {
 	ms := new(mapSlice)
 	ms.m = m
 	ms.isDesc = isDesc
@@ -1810,9 +1789,9 @@ func (ms mapSlice) Swap(i, j int) {
 	ms.m[i], ms.m[j] = ms.m[j], ms.m[i]
 }
 
-func (sr *StatReader) comparatorOrderBy(array []map[string]interface{}, params *Properties) []map[string]interface{} {
+func (sr *StatReader) comparatorOrderBy(array []map[string]any, params *Properties) []map[string]any {
 	if array == nil {
-		array = make([]map[string]interface{}, 0)
+		array = make([]map[string]any, 0)
 	}
 
 	orderBy := DEFAULT_ORDERBY
@@ -1855,7 +1834,6 @@ func (sr *StatReader) comparatorOrderBy(array []map[string]interface{}, params *
 	}
 
 	if len(array) > 0 {
-
 		if orderBy != "" {
 			sort.Sort(newMapSlice(array, !(DEFAULT_ORDER_TYPE == orderType), orderBy))
 		}
@@ -1873,11 +1851,9 @@ func (sr *StatReader) comparatorOrderBy(array []map[string]interface{}, params *
 }
 
 func (sr *StatReader) resetPageInfo(params *Properties, rowCount int, pageCount int, pageNum int) {
-
 	if params != nil {
 		v := params.GetString(PROP_NAME_PAGE_SIZE, "")
 		if v != "" {
-
 			params.Set(PROP_NAME_PAGE_COUNT, strconv.Itoa(pageCount))
 			params.Set(PROP_NAME_TOTAL_ROW_COUNT, strconv.Itoa(rowCount))
 			params.Set(PROP_NAME_PAGE_NUM, strconv.Itoa(pageNum))
@@ -1887,8 +1863,7 @@ func (sr *StatReader) resetPageInfo(params *Properties, rowCount int, pageCount 
 
 const COL_MAX_LEN = 32
 
-func calcColLens(objList []map[string]interface{}, fields []string, maxColLen int) []int {
-
+func calcColLens(objList []map[string]any, fields []string, maxColLen int) []int {
 	colLen := 0
 	colVal := ""
 	colLens := make([]int, len(fields))
@@ -1911,8 +1886,8 @@ func calcColLens(objList []map[string]interface{}, fields []string, maxColLen in
 	return colLens
 }
 
-func addTitles(objList []map[string]interface{}, fields []string) []map[string]interface{} {
-	titleMap := make(map[string]interface{}, len(fields))
+func addTitles(objList []map[string]any, fields []string) []map[string]any {
+	titleMap := make(map[string]any, len(fields))
 	for i := 0; i < len(fields); i++ {
 		titleMap[fields[i]] = fields[i]
 	}
@@ -1923,7 +1898,7 @@ func addTitles(objList []map[string]interface{}, fields []string) []map[string]i
 	return dst
 }
 
-func toTable(objList []map[string]interface{}, fields []string, colLens []int,
+func toTable(objList []map[string]any, fields []string, colLens []int,
 	showAll bool, append bool) string {
 	if fields == nil || objList == nil {
 		return ""
@@ -1949,10 +1924,10 @@ func toTable(objList []map[string]interface{}, fields []string, colLens []int,
 	return output.String()
 }
 
-func formateLine(output *strings.Builder, obj map[string]interface{}, fields []string, colLens []int,
-	showAll bool) map[string]interface{} {
+func formateLine(output *strings.Builder, obj map[string]any, fields []string, colLens []int,
+	showAll bool) map[string]any {
 	hasMore := false
-	objMore := make(map[string]interface{})
+	objMore := make(map[string]any)
 	colLen := 0
 	colVal := ""
 	for i := 0; i < len(fields); i++ {
@@ -1982,9 +1957,8 @@ func formateLine(output *strings.Builder, obj map[string]interface{}, fields []s
 
 	if hasMore {
 		return objMore
-	} else {
-		return nil
 	}
+	return nil
 }
 
 func sepLine(output *strings.Builder, colLens []int) {
@@ -2005,7 +1979,7 @@ func blanks(output *strings.Builder, count int) {
 	}
 }
 
-func getColValue(colObj interface{}) string {
+func getColValue(colObj any) string {
 	var colVal string
 	if colObj == nil {
 		colVal = ""
@@ -2013,9 +1987,9 @@ func getColValue(colObj interface{}) string {
 		colVal = fmt.Sprint(colObj)
 	}
 
-	colVal = strings.Replace(colVal, "\t", "", -1)
-	colVal = strings.Replace(colVal, "\n", "", -1)
-	colVal = strings.Replace(colVal, "\r", "", -1)
+	colVal = strings.ReplaceAll(colVal, "\t", "")
+	colVal = strings.ReplaceAll(colVal, "\n", "")
+	colVal = strings.ReplaceAll(colVal, "\r", "")
 
 	return colVal
 }
@@ -2032,7 +2006,7 @@ type statFlusher struct {
 	flushFreq  int
 	filePath   string
 	filePrefix string
-	buffer     *Dm_build_1212
+	buffer     *Dm_build_931
 }
 
 func newStatFlusher() *statFlusher {
@@ -2043,7 +2017,7 @@ func newStatFlusher() *statFlusher {
 	sf.flushFreq = StatFlushFreq
 	sf.filePath = StatDir
 	sf.filePrefix = "dm_go_stat"
-	sf.buffer = Dm_build_1216()
+	sf.buffer = Dm_build_935()
 	return sf
 }
 
@@ -2060,7 +2034,6 @@ func (sf *statFlusher) isHighFreqSqlStatEnabled() bool {
 }
 
 func (sf *statFlusher) doRun() {
-
 	for {
 		if len(goStat.connStatMap) > 0 {
 			sf.logList = append(sf.logList, time.Now().String())
@@ -2105,33 +2078,35 @@ func (sf *statFlusher) writeAndFlush(logs []string, startOff int, l int) {
 	for i := startOff; i < startOff+l; i++ {
 		bytes = []byte(logs[i] + util.StringUtil.LineSeparator())
 
-		sf.buffer.Dm_build_1238(bytes, 0, len(bytes))
+		sf.buffer.Dm_build_957(bytes, 0, len(bytes))
 
-		if sf.buffer.Dm_build_1217() >= FLUSH_SIZE {
+		if sf.buffer.Dm_build_936() >= FLUSH_SIZE {
 			sf.doFlush(sf.buffer)
 		}
 	}
 
-	if sf.buffer.Dm_build_1217() > 0 {
+	if sf.buffer.Dm_build_936() > 0 {
 		sf.doFlush(sf.buffer)
 	}
 }
 
-func (sf *statFlusher) doFlush(buffer *Dm_build_1212) {
+func (sf *statFlusher) doFlush(buffer *Dm_build_931) {
 	if sf.needCreateNewFile() {
 		sf.closeCurrentFile()
 		sf.logFile = sf.createNewFile()
 	}
 	if sf.logFile != nil {
-		buffer.Dm_build_1232(sf.logFile, buffer.Dm_build_1217())
+		buffer.Dm_build_951(sf.logFile, buffer.Dm_build_936())
 	}
 }
+
 func (sf *statFlusher) closeCurrentFile() {
 	if sf.logFile != nil {
 		sf.logFile.Close()
 		sf.logFile = nil
 	}
 }
+
 func (sf *statFlusher) createNewFile() *os.File {
 	sf.date = time.Now().Format("2006-01-02")
 	fileName := sf.filePrefix + "_" + sf.date + "_" + strconv.Itoa(time.Now().Nanosecond()) + ".txt"
@@ -2151,6 +2126,7 @@ func (sf *statFlusher) createNewFile() *os.File {
 	}
 	return nil
 }
+
 func (sf *statFlusher) needCreateNewFile() bool {
 	now := time.Now().Format("2006-01-02")
 	fileInfo, err := sf.logFile.Stat()

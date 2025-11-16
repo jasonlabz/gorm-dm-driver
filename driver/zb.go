@@ -264,7 +264,6 @@ func (execInfo *execRetInfo) union(other *execRetInfo, startRow int, count int) 
 }
 
 func NewExceInfo() *execRetInfo {
-
 	execInfo := execRetInfo{}
 
 	execInfo.outParamDatas = nil

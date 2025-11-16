@@ -7,6 +7,7 @@ package driver
 
 const (
 	ParamDataEnum_Null = 0
+
 	/**
 	 * 只有大字段才有行内数据、行外数据的概念
 	 */
@@ -21,5 +22,5 @@ type lobCtl struct {
 // lob数据返回信息，自bug610335后，服务器不光返回字节数组，还返回字符数
 type lobRetInfo struct {
 	charLen int64  // 字符长度
-	data    []byte //lob数据
+	data    []byte // lob数据
 }

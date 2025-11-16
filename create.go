@@ -105,7 +105,7 @@ func Create(db *gorm.DB) {
 					}
 					db.Statement.WriteByte(')')
 
-					//outputInserted(db)
+					// outputInserted(db)
 
 					db.Statement.WriteString(" VALUES ")
 
@@ -169,7 +169,7 @@ func Create(db *gorm.DB) {
 		if updateInsertID {
 			switch db.Statement.ReflectValue.Kind() {
 			case reflect.Slice, reflect.Array:
-				//if config.LastInsertIDReversed {
+				// if config.LastInsertIDReversed {
 				for i := db.Statement.ReflectValue.Len() - 1; i >= 0; i-- {
 					rv := db.Statement.ReflectValue.Index(i)
 					if reflect.Indirect(rv).Kind() != reflect.Struct {
@@ -182,7 +182,7 @@ func Create(db *gorm.DB) {
 						insertID -= db.Statement.Schema.PrioritizedPrimaryField.AutoIncrementIncrement
 					}
 				}
-				//} else {
+				// } else {
 				//	for i := 0; i < db.Statement.ReflectValue.Len(); i++ {
 				//		rv := db.Statement.ReflectValue.Index(i)
 				//		if reflect.Indirect(rv).Kind() != reflect.Struct {
@@ -194,7 +194,7 @@ func Create(db *gorm.DB) {
 				//			insertID += db.Statement.Schema.PrioritizedPrimaryField.AutoIncrementIncrement
 				//		}
 				//	}
-				//}
+				// }
 			case reflect.Struct:
 				_, isZero := db.Statement.Schema.PrioritizedPrimaryField.ValueOf(db.Statement.Context, db.Statement.ReflectValue)
 				if isZero {
@@ -286,7 +286,7 @@ func MergeCreate(db *gorm.DB, onConflict clause.OnConflict, values clause.Values
 	}
 
 	db.Statement.WriteString(")")
-	//outputInserted(db)
+	// outputInserted(db)
 	db.Statement.WriteString(";")
 
 	// merge into 语句插入的记录，无法通过LastInsertID获取

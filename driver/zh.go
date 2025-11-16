@@ -275,9 +275,8 @@ func (sf *statFilter) DmRowsColumnTypePrecisionScale(filterChain *filterChain, r
 func getActiveStmtCount(conn *DmConnection) int {
 	if conn.stmtMap == nil {
 		return 0
-	} else {
-		return len(conn.stmtMap)
 	}
+	return len(conn.stmtMap)
 }
 
 func statementCreateAfter(conn *DmConnection, stmt *DmStatement) {
@@ -385,7 +384,6 @@ func internalAfterConnExecute(conn *DmConnection, args interface{}, updateCount 
 			sqlStat.addUpdateCount(int64(updateCount))
 		}
 	}
-
 }
 
 func internalBeforeStatementExecute(stmt *DmStatement, sql string) {
@@ -440,9 +438,7 @@ func internalAfterStatementExecute(stmt *DmStatement, args interface{}, updateCo
 			}
 			sqlStat.addUpdateCount(updateCount)
 		}
-
 	}
-
 }
 
 func buildSlowParameters(args interface{}) string {
@@ -534,7 +530,6 @@ func connExecuteErrorAfter(conn *DmConnection, args interface{}, err error) {
 		sqlStat.addExecuteTimeAndResultHoldTimeHistogramRecord(conn.statInfo.getLastExecuteType(), conn.statInfo.isFirstResultSet(),
 			nanos, parameters)
 	}
-
 }
 
 func statementExecuteErrorAfter(stmt *DmStatement, args interface{}, err error) {
@@ -554,7 +549,6 @@ func statementExecuteErrorAfter(stmt *DmStatement, args interface{}, err error) 
 		sqlStat.addExecuteTimeAndResultHoldTimeHistogramRecord(stmt.statInfo.getLastExecuteType(), stmt.statInfo.isFirstResultSet(),
 			nanos, parameters)
 	}
-
 }
 
 func statementCloseBefore(stmt *DmStatement) {
@@ -601,7 +595,6 @@ func resultSetCloseBefore(resultSet *DmRows) {
 func getFetchedRows(rs *DmRows) int64 {
 	if rs.CurrentRows.currentPos >= rs.CurrentRows.totalRowCount {
 		return rs.CurrentRows.totalRowCount
-	} else {
-		return rs.CurrentRows.currentPos + 1
 	}
+	return rs.CurrentRows.currentPos + 1
 }

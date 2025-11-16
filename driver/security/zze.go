@@ -17,8 +17,8 @@ import (
 )
 
 type SymmCipher struct {
-	encryptCipher interface{} //cipher.BlockMode | cipher.Stream
-	decryptCipher interface{} //cipher.BlockMode | cipher.Stream
+	encryptCipher interface{} // cipher.BlockMode | cipher.Stream
+	decryptCipher interface{} // cipher.BlockMode | cipher.Stream
 	key           []byte
 	block         cipher.Block // 分组加密算法
 	algorithmType int

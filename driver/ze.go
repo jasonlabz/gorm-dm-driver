@@ -578,7 +578,6 @@ func (filter *logFilter) executeAfter(logInfo *logInfo, record *LogRecord) {
 }
 
 func (filter *logFilter) doLog(record *LogRecord) {
-
 	if record == nil {
 		return
 	}
@@ -602,23 +601,29 @@ var AccessLogger = &Logger{}
 func (logger Logger) IsDebugEnabled() bool {
 	return LogLevel >= LOG_DEBUG
 }
+
 func (logger Logger) IsErrorEnabled() bool {
 	return LogLevel >= LOG_ERROR
 }
+
 func (logger Logger) IsInfoEnabled() bool {
 	return LogLevel >= LOG_INFO
 }
+
 func (logger Logger) IsWarnEnabled() bool {
 	return LogLevel >= LOG_WARN
 }
+
 func (logger Logger) IsSqlEnabled() bool {
 	return LogLevel >= LOG_SQL
 }
+
 func (logger Logger) Debug(msg string) {
 	if logger.IsDebugEnabled() {
 		logger.println(logger.formatHead("DEBUG") + msg)
 	}
 }
+
 func (logger Logger) DebugWithErr(msg string, err error) {
 	if logger.IsDebugEnabled() {
 		if e, ok := err.(*DmError); ok {
@@ -628,27 +633,31 @@ func (logger Logger) DebugWithErr(msg string, err error) {
 		}
 	}
 }
+
 func (logger Logger) Info(msg string) {
 	if logger.IsInfoEnabled() {
 		logger.println(logger.formatHead("INFO ") + msg)
 	}
 }
+
 func (logger Logger) Sql(msg string) {
 	if logger.IsSqlEnabled() {
 		logger.println(logger.formatHead("SQL  ") + msg)
 	}
 }
+
 func (logger Logger) Warn(msg string) {
 	if logger.IsWarnEnabled() {
 		logger.println(logger.formatHead("WARN ") + msg)
 	}
 }
+
 func (logger Logger) ErrorWithErr(msg string, err error) {
-	//if e, ok := err.(*DmError); ok {
+	// if e, ok := err.(*DmError); ok {
 	//	logger.println(logger.formatHead("ERROR") + msg + util.LINE_SEPARATOR + e.Stack())
-	//} else {
+	// } else {
 	logger.println(logger.formatHead("ERROR") + msg + util.LINE_SEPARATOR + err.Error())
-	//}
+	// }
 }
 
 // TODO: 获取goroutine objId
@@ -656,6 +665,7 @@ func (logger Logger) formatHead(head string) string {
 	// return "[" + head + " - " + StringUtil.formatTime() + "] tid:" + Thread.currentThread().getId();
 	return "[" + head + " - " + util.StringUtil.FormatTime() + "]"
 }
+
 func (logger Logger) println(msg string) {
 	goMap["log"].(*logWriter).WriteLine(msg)
 }
@@ -764,11 +774,11 @@ func formatTrace(source string, sql string, method string, returnValue interface
 			if i != 0 {
 				str += ", "
 			}
-			//if s, ok := params[i].(driver.NamedValue); ok {
+			// if s, ok := params[i].(driver.NamedValue); ok {
 			//	str += fmt.Sprintf("%v", s.Value)
-			//} else {
+			// } else {
 			str += fmt.Sprintf("%v", params[i])
-			//}
+			// }
 		}
 		str += "; "
 	}

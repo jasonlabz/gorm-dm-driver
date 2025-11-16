@@ -6,7 +6,9 @@
 package util
 
 import (
+	"errors"
 	"go/build"
+	"io/fs"
 	"os"
 	"runtime"
 	"strings"
@@ -19,7 +21,7 @@ const (
 
 var (
 	goRoot = build.Default.GOROOT
-	goPath = build.Default.GOPATH //获取实际编译时的GOPATH值
+	goPath = build.Default.GOPATH // 获取实际编译时的GOPATH值
 )
 
 type fileUtil struct {
@@ -28,7 +30,7 @@ type fileUtil struct {
 var FileUtil = &fileUtil{}
 
 func (fileUtil *fileUtil) Exists(path string) bool {
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
+	if _, err := os.Stat(path); !errors.Is(err, fs.ErrNotExist) {
 		return true
 	}
 	return false
@@ -57,19 +59,19 @@ func (fileUtil *fileUtil) Search(relativePath string) (path string) {
 		}
 	}
 
-	//if workDir, _ := os.Getwd(); fileUtil.Exists(workDir) {
+	// if workDir, _ := os.Getwd(); fileUtil.Exists(workDir) {
 	//	path = workDir + PathSeparator + "src" + PathSeparator + relativePath
 	//	if fileUtil.Exists(path) {
 	//		return path
 	//	}
-	//}
+	// }
 
-	//if fileUtil.Exists(goRoot) {
+	// if fileUtil.Exists(goRoot) {
 	//	path = goRoot + PathSeparator + "src" + PathSeparator + relativePath
 	//	if fileUtil.Exists(path) {
 	//		return path
 	//	}
-	//}
+	// }
 
 	return ""
 }

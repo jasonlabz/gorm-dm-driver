@@ -7,6 +7,7 @@ package i18n
 
 import (
 	"encoding/json"
+
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -22,7 +23,6 @@ type i18n struct {
 }
 
 func InitConfig(jsonStr string) {
-
 	var i18n i18n
 	json.Unmarshal([]byte(jsonStr), &i18n)
 	msaArry := i18n.Messages

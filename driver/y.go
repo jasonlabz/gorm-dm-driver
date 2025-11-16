@@ -75,17 +75,16 @@ func (g *epGroup) connect(connector *DmConnector) (*DmConnection, error) {
 func (g *epGroup) getEPSelector(connector *DmConnector) *epSelector {
 	if connector.epSelector == TYPE_HEAD_FIRST {
 		return newEPSelector(g.epList)
-	} else {
-		serverCount := int32(len(g.epList))
-		sortEPs := make([]*ep, serverCount)
-		g.lock.Lock()
-		defer g.lock.Unlock()
-		g.epStartPos = (g.epStartPos + 1) % serverCount
-		for i := int32(0); i < serverCount; i++ {
-			sortEPs[i] = g.epList[(i+g.epStartPos)%serverCount]
-		}
-		return newEPSelector(sortEPs)
 	}
+	serverCount := int32(len(g.epList))
+	sortEPs := make([]*ep, serverCount)
+	g.lock.Lock()
+	defer g.lock.Unlock()
+	g.epStartPos = (g.epStartPos + 1) % serverCount
+	for i := int32(0); i < serverCount; i++ {
+		sortEPs[i] = g.epList[(i+g.epStartPos)%serverCount]
+	}
+	return newEPSelector(sortEPs)
 }
 
 /**

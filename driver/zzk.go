@@ -64,20 +64,18 @@ func lexSkipWhitespace(sql string, n int) ([]*parser.LVal, error) {
 		if err != nil {
 			return nil, err
 		}
-
 	}
 
 	return lvalList, nil
 }
 
 func (dc *DmConnection) escape(sql string, keywords []string) (string, error) {
-
-	if (keywords == nil || len(keywords) == 0) && strings.Index(sql, "{") == -1 {
+	if (keywords == nil || len(keywords) == 0) && !strings.Contains(sql, "{") {
 		return sql, nil
 	}
-	var keywordMap map[string]interface{}
-	if keywords != nil && len(keywords) > 0 {
-		keywordMap = make(map[string]interface{}, len(keywords))
+	var keywordMap map[string]any
+	if len(keywords) > 0 {
+		keywordMap = make(map[string]any, len(keywords))
 		for _, keyword := range keywords {
 			keywordMap[strings.ToUpper(keyword)] = nil
 		}
@@ -142,7 +140,6 @@ func (dc *DmConnection) escape(sql string, keywords []string) (string, error) {
 				}
 			} else if util.StringUtil.Equals(lval0.Value, "}") {
 				if len(stack) != 0 && stack[len(stack)-1] {
-
 				} else {
 					nsql.WriteString(lval0.Value)
 				}
@@ -182,7 +179,7 @@ func next(lvalList []*parser.LVal, start int) *parser.LVal {
 	return lval
 }
 
-func (dc *DmConnection) execOpt(sql string, optParamList []OptParameter, serverEncoding string) (string, []OptParameter, error) {
+func (dc *DmConnection) execOpt(sql string, optParamList []OptParameter, serverEncoding string, backSlashFlag bool) (string, []OptParameter, error) {
 	nsql := bytes.NewBufferString("")
 
 	lvalList, err := dc.lex(sql)
@@ -219,7 +216,6 @@ func (dc *DmConnection) execOpt(sql string, optParamList []OptParameter, serverE
 
 				if value <= int(INT32_MAX) && value >= int(INT32_MIN) {
 					optParamList = append(optParamList, newOptParameter(G2DB.toInt32(int32(value)), INT, INT_PREC))
-
 				} else {
 					optParamList = append(optParamList, newOptParameter(G2DB.toInt64(int64(value)), BIGINT, BIGINT_PREC))
 				}
@@ -245,13 +241,15 @@ func (dc *DmConnection) execOpt(sql string, optParamList []OptParameter, serverE
 			}
 		case parser.STRING:
 			{
-
 				if len(lval.Value) > int(INT16_MAX) {
-
 					nsql.WriteString("'" + util.StringUtil.ProcessSingleQuoteOfName(lval.Value) + "'")
 				} else {
 					nsql.WriteString("?")
-					optParamList = append(optParamList, newOptParameter(Dm_build_931.Dm_build_1147(lval.Value, serverEncoding, dc), VARCHAR, VARCHAR_PREC))
+
+					if backSlashFlag {
+						lval.Value = util.StringUtil.Translate(lval.Value)
+					}
+					optParamList = append(optParamList, newOptParameter(Dm_build_650.Dm_build_866(lval.Value, serverEncoding, dc), VARCHAR, VARCHAR_PREC))
 				}
 			}
 		case parser.HEX_INT:
